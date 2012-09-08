@@ -106,10 +106,10 @@ int main()
 	int pitch=10;
 	IplImage *matherImg = 0;
 	IplImage* sampleImg =0;
-	if ((sampleImg = cvLoadImage("rotate degree1.00.jpg",0))==NULL)printf("load sample erro\n");
+	if ((sampleImg = cvLoadImage("../cvtest/rotate degree1.00.jpg",0))==NULL)printf("load sample erro\n");
 	printf("src height:%d,width:%d,src channel:%d,depth:%d\n",sampleImg->height,sampleImg->width,sampleImg->nChannels,sampleImg->depth);
 
-	if((matherImg = cvLoadImage("geZiBu.jpg",0))==NULL)printf("load erro\n");
+	if((matherImg = cvLoadImage("../cvtest/geZiBu.jpg",0))==NULL)printf("load erro\n");
 
 	printf("src height:%d,width:%d,src channel:%d,depth:%d\n",matherImg->height,sampleImg->width,matherImg->nChannels,matherImg->depth);
 	IplImage* lineImg = cvCloneImage(matherImg);
@@ -120,7 +120,7 @@ int main()
 	int hdrWidth = 30;
 	int hdrHeight = 11;//3,5,7...
 	int gradSlideTol = 2;
-	int targetLineNum = 410;
+	int targetLineNum = 400;
 	int gradStep =3;
 	initMatherHeaderSects(matherImg,hdrWidth,hdrHeight,gradStep);
 

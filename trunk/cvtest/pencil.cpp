@@ -156,7 +156,7 @@ int find_sample_hdr_pos(IplImage *srcSample,int target_line_num,int hdr_width,in
 void initMatherHeaderSects(IplImage* matherImg,int headWidth,int headHeight,int gradStep)
 {
 	 g_logfile = fopen("log.txt","w");
-	 parse_configfile("calangle.conf");
+	 parse_configfile("../cvtest/calangle.conf");
 	//alloc Sec
 	g_matherSecHdrCnt = matherImg->height-headHeight;
 	g_pSect = (Section_t *)malloc(g_matherSecHdrCnt*sizeof(Section_t));
