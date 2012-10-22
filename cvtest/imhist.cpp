@@ -84,7 +84,7 @@ int main()
 	for (int i=0;i<MAX_SEC_CNT;i++)
 	{
 		
-		cal_one_pen_head(src,rect,&sec[i]);
+		cal_one_pen_sect(src,rect,&sec[i]);
 		 cmp = cvCompareHist(sec[0].hist,sec[i].hist,CV_COMP_CHISQR);
 		fprintf(logfile,"rect.y:%d,mean:%d,sdv:%d,CMP:%.2f\n",rect.y,sec[i].mean,sec[i].std_dev,cmp);
 		rect.y+=pitch;
@@ -100,7 +100,7 @@ int main()
 	return 0;
 }
 #endif
-#if 1
+#if 0
 int main()
 {
 	int pitch=10;
@@ -122,6 +122,7 @@ int main()
 	int gradSlideTol = 2;
 	int targetLineNum = 400;
 	int gradStep =3;
+	 initParms();
 	initMatherHeaderSects(matherImg,hdrWidth,hdrHeight,gradStep);
 
 	
@@ -129,7 +130,7 @@ int main()
 
 
 	int rst = find_sample_hdr_pos(sampleImg,targetLineNum,hdrWidth,hdrHeight,gradSlideTol);
-	printf("find line:%d\n",rst);
+	printf("targetline:%d,find line:%d\n",targetLineNum,rst);
 
 	llf_printf("the end of print\n");
 	formatImg(sampleImg,pitch);
