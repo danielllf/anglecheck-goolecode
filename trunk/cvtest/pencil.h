@@ -19,7 +19,7 @@ typedef struct{
 	CvHistogram *hist;
 	double mean;//均值
 	int* grads;//梯度
-	int grads_len;//梯度数组长度,每个元素为一个像素时，其值等于sect.width
+	int grads_len;//梯度数组长度,每个元素为一个像素时，其值等于sect.width;多个像素为一元素时，则grads_len！=sect length
 	int grads_step;//梯度数组的每个元素rect的宽度
 	int line_num;//铅笔心所在的行号
 	
@@ -33,13 +33,30 @@ typedef struct{
 	double gradDiff;
 }Cmp_t;
 
+typedef struct PenParam{
+	 Section_t *pSect;//指向mather pic section区域首地址
+	 Section_t * pMatherBodySect;//指向mather pen body sect 内存区域
+	 Section_t * pSampleBodySect;//指向sample body sect 内存区域
+	 int hdrSecLen;//header 区域的长度
+	 int bodySecLen;//body 每个子区域的长度
+	int gradsLen;
+	int gradStep;
+	int matherSecHdrCnt;// 铅笔在模板中的个数(纵向)
+	int bodySecCnt;//一个铅笔中包含多少子区域
+	CvSize bodySecSize;
+}PenParam;
+/**
+*初始化所有配置参数，由配置文件读入
+*/
+void initParms();
+
 /*
 *fun:计算一个铅笔头部的特征信息
 *src:用于计算的源图像 
 *rect:铅笔头所在区域
 *sec:将计算的结果存入sec中
 */
-void cal_one_pen_head(IplImage* src,Section_t*  sec);
+void cal_one_pen_sect(IplImage* src,Section_t*  sec);
 
 //need all arrays:sec[] and grads[] allocted first.
 void cal_mather_header(IplImage* src,Section_t* sec, int hdr_width,int hdr_height);
@@ -79,7 +96,7 @@ void initMatherHeaderSects(IplImage* matherImg,int headWidth,int headHeight,int 
 
 /*
 *free mather图中所有header sec[]
-*
+*return:-1 erro
 */
-void freeMatherHeadSecs();
+int freeMatherHeadSecs();
 #endif

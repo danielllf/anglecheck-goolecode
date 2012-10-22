@@ -9,6 +9,8 @@ using namespace cv;
 #define LLF_PRINTF  
 
 extern FILE* g_logfile;
+extern struct PenParam penParam;
+
 #ifdef LLF_PRINTF  
 #define llf_printf(format,...) fprintf(g_logfile,"Func:"__FUNCTION__", Line: %04d=> "format, __LINE__, ##__VA_ARGS__) ;\
 			fflush(g_logfile);

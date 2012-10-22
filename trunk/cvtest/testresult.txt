@@ -1,0 +1,63 @@
+  匹配方法如下：
+	CV_TM_SQDIFF        =0,平方差匹配
+    CV_TM_SQDIFF_NORMED =1,归一化平方差匹配
+    CV_TM_CCORR         =2,相关匹配
+    CV_TM_CCORR_NORMED  =3,
+    CV_TM_CCOEFF        =4,相关匹配二
+    CV_TM_CCOEFF_NORMED =5
+
+mather:480*640
+1 degree:
+src height:40,width:89,src channel:1,depth:8
+method:0, find maxpoint(360,91), minPoint(261,161), min:343209.000,Max:46686512.000
+method:1, find maxpoint(443,48), minPoint(261,161), min:0.007,Max:1.000
+method:2, find maxpoint(330,142), minPoint(52,88), min:7780008.500,Max:62152476.000
+method:3, find maxpoint(261,161), minPoint(9,101), min:0.482,Max:0.997
+method:4, find maxpoint(261,161), minPoint(360,91), min:-10290162.000,Max:12476330.000
+method:5, find maxpoint(261,161), minPoint(154,238), min:-0.802,Max:0.987
+找到匹配点：(261,161)
+
+2 degree:
+src height:72,width:50,src channel:3,depth:8
+method:0, find maxpoint(513,91), minPoint(250,131), min:3141404.000,Max:152717968.000
+method:1, find maxpoint(467,26), minPoint(250,131), min:0.019,Max:1.000
+method:2, find maxpoint(354,126), minPoint(64,67), min:25397898.000,Max:199231392.000
+method:3, find maxpoint(250,131), minPoint(103,92), min:0.382,Max:0.990
+method:4, find maxpoint(250,132), minPoint(540,73), min:-29428826.000,Max:34674092.000
+method:5, find maxpoint(250,131), minPoint(121,379), min:-0.799,Max:0.957
+找到匹配点：(250,131)
+
+3 degree:
+src height:74,width:84,src channel:3,depth:8
+method:0, find maxpoint(356,59), minPoint(253,279), min:8691078.000,Max:209
+method:1, find maxpoint(447,27), minPoint(253,279), min:0.037,Max:1.000
+method:2, find maxpoint(354,123), minPoint(37,361), min:41119064.000,Max:30
+method:3, find maxpoint(253,279), minPoint(26,48), min:0.506,Max:0.982
+method:4, find maxpoint(461,129), minPoint(356,59), min:-38742692.000,Max:5
+method:5, find maxpoint(253,279), minPoint(149,357), min:-0.687,Max:0.924
+找到匹配点：(256,156)
+
+4 degree:
+src height:72,width:70,src channel:3,depth:8
+method:0, find maxpoint(53,67), minPoint(161,63), min:10032394.000,Max:200384400.000
+method:1, find maxpoint(452,31), minPoint(161,63), min:0.036,Max:1.000
+method:2, find maxpoint(364,0), minPoint(53,67), min:42718904.000,Max:322770272.000
+method:3, find maxpoint(161,63), minPoint(26,87), min:0.628,Max:0.982
+method:4, find maxpoint(161,63), minPoint(470,130), min:-27090148.000,Max:31357754.000
+method:5, find maxpoint(161,63), minPoint(259,283), min:-0.632,Max:0.862
+找到匹配点：(161,63)
+
+
+5 degree:
+src height:65,width:69,src channel:3,depth:8
+method:0, find maxpoint(56,67), minPoint(163,208), min:10070471.000,Max
+method:1, find maxpoint(456,33), minPoint(163,208), min:0.048,Max:1.000
+method:2, find maxpoint(361,0), minPoint(53,69), min:33172832.000,Max:2
+method:3, find maxpoint(368,62), minPoint(66,137), min:0.621,Max:0.977
+method:4, find maxpoint(369,62), minPoint(478,135), min:-29365438.000,M
+method:5, find maxpoint(368,62), minPoint(66,139), min:-0.700,Max:0.869
+找到匹配点：(163,208)和(368,62)，其中(368,62)为另一个cycle中的匹配点，所以
+在计算时需要对在一个cycle中进行。
+
+
+总结：平方差似乎总能找到最好匹配

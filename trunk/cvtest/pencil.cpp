@@ -1,13 +1,28 @@
 #include "utility.h"
 #include "pencil.h"
 
-#define CACL_GRADES 1
-Section_t *g_pSect=NULL;//指向section区域首地址
-static int g_hdrSecLen = 0;//header 区域的长度
-int g_gradsLen = 0;
-int g_gradStep = 0;
-int g_matherSecHdrCnt = 0;// 铅笔在模板中的个数
+#define CACL_GRADES 1 //是否计算梯度
+//static Section_t *g_pSect=NULL;//指向mather pic section区域首地址
+//static Section_t * pMatherBodySect = NULL;//指向mather pen body sect 内存区域
+//static Section_t * pSampleBodySect = NULL;//指向sample body sect 内存区域
+//static int g_hdrSecLen = 0;//header 区域的长度
+//static int g_bodySecLen = 0;//body 每个子区域的长度
+//int g_gradsLen = 0;
+//int g_gradStep = 0;
+//int g_matherSecHdrCnt = 0;// 铅笔在模板中的个数(纵向)
+//int g_subSecCnt = 0;//一个铅笔中包含多少子区域
+//static CvSize bodySecSize;
 FILE* g_logfile=NULL; 
+PenParam penParam;
+
+
+void initParms()
+{ 
+	g_logfile = fopen("log.txt","w");
+	parse_configfile("../cvtest/calangle.conf");
+
+}
+
 //计算水平方向梯度,以每一列为计算单元
 //grads为指向梯度数组指针
 void cal_horiz_grads(IplImage *src, Section_t * sec)
@@ -38,7 +53,7 @@ void cal_horiz_grads(IplImage *src, Section_t * sec)
 	cvReleaseImageHeader(&sub_img);
 	#endif
 }
-void  cal_one_pen_head(IplImage* src,Section_t*  sec)
+void  cal_one_pen_sect(IplImage* src,Section_t*  sec)
 {
 
 	IplImage *sub_img = cvCreateImageHeader(
@@ -83,12 +98,12 @@ void cal_mather_header(IplImage* src,Section_t* sec, int hdr_width,int hdr_heigh
 	CvRect rect = cvRect(0,0,hdr_width,hdr_height);
 
 
-	for (int i=0;i<g_matherSecHdrCnt;i++)
+	for (int i=0;i<penParam.matherSecHdrCnt;i++)
 	{	
 		sec[i].rect = rect;
 		sec[i].line_num = rect.y+rect.height/2;
 
-		cal_one_pen_head(src,&sec[i]);
+		cal_one_pen_sect(src,&sec[i]);
 
 		rect.y += 1;
 	}
@@ -124,18 +139,18 @@ int find_sample_hdr_pos(IplImage *srcSample,int target_line_num,int hdr_width,in
 	assert(hdr_height%2!=0&&hdr_height>=3);
 
 	Section_t sample_sec;
-	sample_sec.grads = (int*)malloc(g_gradsLen*sizeof(int));
-	sample_sec.grads_step = g_gradStep;
-	sample_sec.grads_len = g_gradsLen;
+	sample_sec.grads = (int*)malloc(penParam.gradsLen*sizeof(int));
+	sample_sec.grads_step = penParam.gradStep;
+	sample_sec.grads_len = penParam.gradsLen;
 	sample_sec.rect = cvRect(0,target_line_num - hdr_height/2,hdr_width,hdr_height);
 	sample_sec.line_num = target_line_num;
 
 	//cal sample hdr
-	cal_one_pen_head(srcSample,&sample_sec);
+	cal_one_pen_sect(srcSample,&sample_sec);
 
 	//compare sample and stored models of hdr
 		Cmp_t tmp,min_cmp;
-		for (int i=0;i<g_matherSecHdrCnt;i++)
+		for (int i=0;i<penParam.matherSecHdrCnt;i++)
 		{
 			tmp = cmp_head(&sample_sec,getMatherSecByIdx(i),grads_slide_tolerance);
 			llf_printf("line:%d,leicha:%.2f,meanDiff:%.2f,histDiff:%.2f,gradsDiff:%.2f\n",tmp.line_num,tmp.leicha,tmp.meanDiff,tmp.histDiff,tmp.gradDiff);
@@ -155,65 +170,189 @@ int find_sample_hdr_pos(IplImage *srcSample,int target_line_num,int hdr_width,in
 //hdr_height must be 奇数.3,5,7....
 void initMatherHeaderSects(IplImage* matherImg,int headWidth,int headHeight,int gradStep)
 {
-	 g_logfile = fopen("log.txt","w");
-	 parse_configfile("../cvtest/calangle.conf");
+
 	//alloc Sec
-	g_matherSecHdrCnt = matherImg->height-headHeight;
-	g_pSect = (Section_t *)malloc(g_matherSecHdrCnt*sizeof(Section_t));
-	if (!g_pSect)
+	penParam.matherSecHdrCnt = matherImg->height-headHeight;
+	penParam.pSect = (Section_t *)malloc(penParam.matherSecHdrCnt*sizeof(Section_t));
+	if (!penParam.pSect)
 	{
 		llf_error("malloc header sect erro\n");
 		return;
 	}
-	memset(g_pSect,0,g_matherSecHdrCnt*sizeof(Section_t));
+	memset(penParam.pSect,0,penParam.matherSecHdrCnt*sizeof(Section_t));
 	//alloc grades array for each Sec
-	g_gradsLen = headWidth/gradStep;
-	g_gradStep = gradStep;
+	penParam.gradsLen = headWidth/gradStep;
+	penParam.gradStep = gradStep;
 
 	
-	for (int i=0;i<g_matherSecHdrCnt;i++)
+	for (int i=0;i<penParam.matherSecHdrCnt;i++)
 	{
-		//Section_t *tmpSec = &g_pSect[i];
+		//Section_t *tmpSec = &penParam.pSect[i];
 		//init sec member
-		g_pSect[i].grads_len = g_gradsLen;// may change when need to wide the grades
-		g_pSect[i].grads_step = g_gradStep;
-		g_pSect[i].grads = (int *)malloc(g_pSect[i].grads_len*sizeof(int));
-		if (!g_pSect[i].grads)
+		penParam.pSect[i].grads_len = penParam.gradsLen;// may change when need to wide the grades
+		penParam.pSect[i].grads_step = penParam.gradStep;
+		penParam.pSect[i].grads = (int *)malloc(penParam.pSect[i].grads_len*sizeof(int));
+		if (!penParam.pSect[i].grads)
 		{
 			llf_error("failed to malloc grades for sec[%d]\n",i);
 			return;
 		}
+		memset(penParam.pSect[i].grads,0,penParam.pSect[i].grads_len*sizeof(int));
 	}
 	
 }
 
-void freeMatherHeadSecs()
+int freeMatherHeadSecs()
 {
 	fclose(g_logfile);
-	for (int i=0;i < g_hdrSecLen; i++)
+	for (int i=0;i < penParam.hdrSecLen; i++)
 	{
-		if(g_pSect)
+		if(penParam.pSect)
 		{
-			if (g_pSect[i].grads!=NULL)
-				free(g_pSect->grads);
+			if (penParam.pSect[i].grads!=NULL)
+				free(penParam.pSect->grads);
 			else
-				llf_error("fail to free grads of sec [%d]\n",i);
+				llf_error("fail to free grads of hdr sec [%d]\n",i);
 
-			free(g_pSect);
-			g_pSect = NULL;
+			free(penParam.pSect);
+			penParam.pSect = NULL;
 		}
 		else
+		{
 			llf_error("failed tofreeMatherHeadSec[%d]",i);
+			return -1;
+		}
 	}
 }
 Section_t* getMatherSecByIdx(int idx)
 {
-	if (g_pSect)
+	if (penParam.pSect)
 	{
-		return &g_pSect[idx];
+		return &penParam.pSect[idx];
+	}
+	else
+	{
+		llf_error("failed to GetMatherSec\n");
+		return NULL;
+	}
+
+}
+
+//以下匹配尾部
+//将铅笔尾部分成多个子区域，分别与模板中对应的子块进行匹配
+CvSize getSectSize()
+{
+	if (penParam.bodySecSize.height!=0&&penParam.bodySecSize.width!=0)
+	{
+		return penParam.bodySecSize;
+	}
+	else
+		llf_error("penParam.bodySecSize is 0\n");
+}
+//rect.height must be 奇数.3,5,7....
+void initMatherBodySects(IplImage* matherImg,int subSecHeight,int subSecLen,int gradStep)
+{
+	
+	assert(subSecHeight%2!=0);
+	//init body sec size
+	penParam.bodySecSize.height = subSecHeight;
+	penParam.bodySecSize.width = subSecLen;
+
+	int bodySecCnt = matherImg->width/subSecLen;
+
+	penParam.pMatherBodySect =(Section_t*) malloc(bodySecCnt*sizeof(Section_t));
+	if (!penParam.pMatherBodySect)
+	{
+		llf_error("malloc body sect erro\n");
+		return;
+	}
+	memset(penParam.pMatherBodySect,0,bodySecCnt*sizeof(Section_t));
+	//alloc grades array for each Sec
+	for (int i=0;i<bodySecCnt;i++)
+	{
+		//init sec member
+		penParam.pMatherBodySect[i].grads_len = subSecLen;// may change when need to wide the grades
+		penParam.pMatherBodySect[i].grads_step = penParam.gradStep;
+		penParam.pMatherBodySect[i].grads = (int *)malloc(penParam.pMatherBodySect[i].grads_len*sizeof(int));
+		memset(penParam.pMatherBodySect[i].grads,0,penParam.pMatherBodySect[i].grads_len*sizeof(int));
+		if (!penParam.pMatherBodySect[i].grads)
+		{
+			llf_error("failed to malloc grades for body sec[%d]\n",i);
+			return;
+		}
+	}
+
+}
+
+void initSampleBodySects(IplImage* sampleImg,int subSecHeight,int subSecLen,int gradStep)
+{
+
+	assert(subSecHeight%2!=0);
+	int bodySecCnt = sampleImg->width/subSecLen;
+
+	penParam.pSampleBodySect =(Section_t*) malloc(bodySecCnt*sizeof(Section_t));
+	if (!penParam.pSampleBodySect)
+	{
+		llf_error("malloc body sect erro\n");
+		return;
+	}
+	memset(penParam.pSampleBodySect,0,bodySecCnt*sizeof(Section_t));
+	//alloc grades array for each Sec
+	for (int i=0;i<bodySecCnt;i++)
+	{
+		//init sec member
+		penParam.pSampleBodySect[i].grads_len = subSecLen;// may change when need to wide the grades
+		penParam.pSampleBodySect[i].grads_step = penParam.gradStep;
+		penParam.pSampleBodySect[i].grads = (int *)malloc(penParam.pSampleBodySect[i].grads_len*sizeof(int));
+		memset(penParam.pSampleBodySect[i].grads,0,penParam.pSampleBodySect[i].grads_len*sizeof(int));
+		if (!penParam.pSampleBodySect[i].grads)
+		{
+			llf_error("failed to malloc grades for sample body sec[%d]\n",i);
+			return;
+		}
+	}
+
+}
+Section_t* getMatherRowSecByIdx(int idx)
+{
+	if (penParam.pMatherBodySect)
+	{
+		return &penParam.pMatherBodySect[idx];
 	}
 	else
 		llf_error("failed to GetMatherSec\n");
+
+}
+Section_t* getSampleRowSecByIdx(int idx)
+{
+	if (penParam.pSampleBodySect)
+	{
+		return &penParam.pSampleBodySect[idx];
+	}
+	else
+		llf_error("failed to GetMatherSec\n");
+	return NULL;
+
+}
+
+void fillMotherBodySects(IplImage *img,int targetLine,int sectHeight,int sectLen)
+{
+	assert(sectHeight%2!=0);
+	int secCnt = img->width/sectLen;//舍弃最后一个长度小于sectLen的sec
+	int radius = sectHeight/2;
+	CvRect rect = cvRect(0,targetLine-radius,sectLen,sectHeight);
+
+	for (int i=0;i<secCnt;i++)
+	{
+		penParam.pMatherBodySect[i].rect = rect;
+		penParam.pMatherBodySect[i].line_num = targetLine;
+		cal_one_pen_sect(img,getMatherRowSecByIdx(i));
+		rect.x += sectLen;
+	}
+
+}
+void cmpThePen(IplImage* sampleImg)
+{
 
 }
 
