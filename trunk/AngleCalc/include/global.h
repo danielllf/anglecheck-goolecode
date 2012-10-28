@@ -2,16 +2,18 @@
 
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
-
+#include <cv.h>
+#include <cxcore.h>
+#include <opencv.hpp>
+#include <highgui.h>
+#include <stdio.h>
 #include "statistic.h"
 #include "MatherPic.h"
 #include "linklist.h"
 #include "testarray.h"
 #include "utility.h"
-#include <cv.h>
-#include <cxcore.h>
-#include <opencv.hpp>
-#include <highgui.h>
+#include "mather.h"
+#include "Sample.h"
 
 
 
