@@ -18,10 +18,12 @@ public:
 	*			-1£∫ªÒ»° ß∞‹
 	*/
 	int getTmplate(IplImage ** temp);
+	void markTmpRect();
 	void stepTmplate();
 	CvRect m_rectTmplate;
-private:
 	IplImage *m_sample;
+private:
+	
 	IplImage *m_templateImg;
 	int m_iterTemplate;
 	int m_totTmplateNum;

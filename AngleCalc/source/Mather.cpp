@@ -5,6 +5,7 @@ Mather::Mather(IplImage *src)
 {
 		m_src = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
 		cvCopy(src,m_src);
+		m_maxTol = 80;
 }
 Mather::~Mather()
 {
@@ -16,21 +17,51 @@ void Mather:: createTmplate(IplImage *templ)
 {
 	m_template = cvCreateImage(cvSize(templ->width, templ->height),templ->depth, templ->nChannels);
 	cvCopy(templ,m_template);
+	
 }
 
 void Mather::releaseTmplate(IplImage *tmpl)
 {
 		cvReleaseImage(&m_template);
 }
-
-CvPoint Mather:: findMatchPoint( IplImage *templ, int nMethods, int priorityMethod, bool useNormed)
+IplImage * Mather::getSubSrc( IplImage *src, CvRect rect)
 {
+	IplImage *subROI = cvCreateImageHeader(
+		cvSize(rect.width,rect.height),src->depth,src->nChannels);
+
+	(subROI)->origin = src->origin;
+	(subROI)->widthStep = src->widthStep;
+	subROI->imageData =  src->imageData + m_matherRect.y*src->widthStep +	m_matherRect.x;		
+	IplImage * subSrc = cvCreateImage(cvSize(subROI->width,subROI->height),subROI->depth,subROI->nChannels);
+	cvCopy(subROI,subSrc);
+	cvReleaseImageHeader(&subROI);
+	return subSrc;
+}
+void Mather::releaseSubSrc(IplImage **subSrc)
+{
+	cvReleaseImage(subSrc);
+}
+void Mather::CalcMatherRect(CvRect sampleRect)
+{
+	int newWidthtSrc = sampleRect.width+m_maxTol;
+	if (newWidthtSrc>=m_src->width)
+	{
+		newWidthtSrc = m_src->width - sampleRect.x-1;
+	}
+	m_matherRect =cvRect(sampleRect.x,sampleRect.y-m_maxTol,newWidthtSrc,sampleRect.height+2*m_maxTol);
+
+}
+CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMethod, bool useNormed)
+{
+	CalcMatherRect(sampleRect);
+	IplImage *subSrc = getSubSrc(m_src,m_matherRect);
+
 	IplImage *ftmp[6]={NULL};
 	int method=0;
-	int patchx = templ->width;
-	int patchy = templ->height;
-	int iwidth = m_src->width - patchx + 1;
-	int iheight = m_src->height - patchy + 1;
+	int patchx = m_template->width;
+	int patchy = m_template->height;
+	int iwidth = subSrc->width - patchx + 1;
+	int iheight = subSrc->height - patchy + 1;
 	if(nMethods==1)
 	{//priority
 		ftmp[priorityMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
@@ -71,7 +102,7 @@ CvPoint Mather:: findMatchPoint( IplImage *templ, int nMethods, int priorityMeth
 		resultPoints[i] = impossiblePt;//
 		
 		if(ftmp[i]==NULL)continue;
-		cvMatchTemplate( m_src, templ, ftmp[i], i); 
+		cvMatchTemplate( subSrc, m_template, ftmp[i], i); 
 		double min,max;
 		CvPoint maxPoint,minPoint;
 		cvMinMaxLoc(ftmp[i],&min,&max,&minPoint, &maxPoint);
@@ -135,7 +166,7 @@ CvPoint Mather:: findMatchPoint( IplImage *templ, int nMethods, int priorityMeth
 		}
 		
 	}
-	
+	releaseSubSrc(&subSrc);
 	//printf("pos:%d,cnt:%d\n",temIter,temp);
 	return  resultPoints[temIter];
 }

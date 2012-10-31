@@ -25,12 +25,17 @@ public:
 	//平方差为优先匹配法。为了加快速度可将nMethods设为3,但误差可能会提高。
 	//使用计算归一化法（区别于cvNormalize,this is just for display）可提高匹配精度，但计算量更大
 	//priorityMethod=0,2,4
-	CvPoint findMatchPoint(IplImage *temp, int nMethods=3, int priorityMethod=CV_TM_SQDIFF, bool useNormed=true);
-	
+	CvPoint findMatchPoint(CvRect sampleRect, int nMethods=3, int priorityMethod=CV_TM_SQDIFF, bool useNormed=true);
+	IplImage *getSubSrc(IplImage *src, CvRect rect);
+	void releaseSubSrc(IplImage **subSrc);
+	void CalcMatherRect(CvRect sampleRect);
 
 private:
 	IplImage *m_src;
+	int m_maxTol;//按一定角度算出最大长度时的上限偏移
 public:
 	IplImage *m_template;
+	CvRect m_matherRect;
+
 };
 #endif
