@@ -31,8 +31,7 @@ void Sample::loadSamplePic(IplImage *sample)
 	cvCopy(sample,m_sample);
 }
 
-//对一个图所有子template操作完后，调用resetTmplate以为下一幅sample图做准备
-//初始化这一组template 的starline 和 cvsize，与具体图像数据有关
+
 void Sample::initTmplate(int starLine, CvSize templateSize)
 {
 	m_tmplateSize = templateSize;
@@ -64,7 +63,7 @@ int Sample::getTmplate(IplImage ** temp)
 		printf("template:(%d,%d)\t",m_rectTmplate.x,m_rectTmplate.y);
 
 		*temp=m_templateImg;
-
+		
 		return 0;	
 	}
 	else
@@ -73,6 +72,16 @@ int Sample::getTmplate(IplImage ** temp)
 	}
 }
 
+//color the rect
+void Sample::markTmpRect()
+{
+	cvSetImageROI(m_sample,m_rectTmplate);
+	if(m_iterTemplate%2==0)
+		cvAddS(m_sample,cvScalar(100),m_sample);
+	else
+		cvAddS(m_sample,cvScalar(-100),m_sample);
+	cvResetImageROI(m_sample);
+}
 void Sample::stepTmplate()
 {
 	//right move rect 
