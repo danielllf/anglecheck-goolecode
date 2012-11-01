@@ -34,12 +34,16 @@ int main( int argc, char** argv ) {
 			cvSet(result,cvScalar(255));
 	
 		cvResetImageROI(result);
+		//mark rect with color
 		sample.markTmpRect();
+		mather->markTmpRect();
+
 		sample.stepTmplate();
 		++i;
 	}
-	cvNamedWindow("sample");
-	cvShowImage("sample",sample.m_sample);
+
+	sample.showPic();
+	mather->showPic();
 	cvNamedWindow("findresult");
 	cvShowImage("findresult",result);
 	cvWaitKey();

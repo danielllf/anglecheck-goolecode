@@ -87,3 +87,8 @@ void Sample::stepTmplate()
 	//right move rect 
 	m_rectTmplate.x += m_tmplateSize.width;
 }
+void Sample::showPic()
+{
+	cvNamedWindow("sample");
+	cvShowImage("sample",m_sample);
+}
