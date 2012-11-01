@@ -5,7 +5,12 @@ Mather::Mather(IplImage *src)
 {
 		m_src = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
 		cvCopy(src,m_src);
-		m_maxTol = 80;
+
+		m_cpsrc = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
+		cvCopy(src,m_cpsrc);
+
+		m_maxTol = 80;//to be changed by future
+		m_iterTemplate = 0;
 }
 Mather::~Mather()
 {
@@ -49,7 +54,7 @@ void Mather::CalcMatherRect(CvRect sampleRect)
 		newWidthtSrc = m_src->width - sampleRect.x-1;
 	}
 	m_matherRect =cvRect(sampleRect.x,sampleRect.y-m_maxTol,newWidthtSrc,sampleRect.height+2*m_maxTol);
-
+	m_iterTemplate+=1;
 }
 CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMethod, bool useNormed)
 {
@@ -171,4 +176,18 @@ CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMet
 	return  resultPoints[temIter];
 }
 
-
+//color the rect
+void Mather::markTmpRect()
+{
+	cvSetImageROI(m_cpsrc,m_matherRect);
+	if(m_iterTemplate%2==0)
+		cvAddS(m_cpsrc,cvScalar(100),m_cpsrc);
+	else
+		cvAddS(m_cpsrc,cvScalar(-100),m_cpsrc);
+	cvResetImageROI(m_cpsrc);
+}
+void Mather::showPic()
+{
+	cvNamedWindow("mather");
+	cvShowImage("mather",m_cpsrc);
+}

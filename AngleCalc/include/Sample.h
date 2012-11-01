@@ -20,6 +20,7 @@ public:
 	int getTmplate(IplImage ** temp);
 	void markTmpRect();
 	void stepTmplate();
+	void showPic();
 	CvRect m_rectTmplate;
 	IplImage *m_sample;
 private:

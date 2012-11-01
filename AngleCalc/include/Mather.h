@@ -29,10 +29,14 @@ public:
 	IplImage *getSubSrc(IplImage *src, CvRect rect);
 	void releaseSubSrc(IplImage **subSrc);
 	void CalcMatherRect(CvRect sampleRect);
+	void markTmpRect();
+	void showPic();
 
 private:
 	IplImage *m_src;
+	IplImage *m_cpsrc;
 	int m_maxTol;//按一定角度算出最大长度时的上限偏移
+	int m_iterTemplate;
 public:
 	IplImage *m_template;
 	CvRect m_matherRect;
