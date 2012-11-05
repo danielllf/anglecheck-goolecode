@@ -1,6 +1,7 @@
 
 #include "global.h"
 
+
 int main( int argc, char** argv ) {
 
 	IplImage *src, *templ,*ftmp[6], *srcImg; //ftmp is what to display on
