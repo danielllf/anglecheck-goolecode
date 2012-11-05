@@ -5,15 +5,16 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
+//#include "Sample.h"
 
 class Mather
 {
+	friend class Sample;
 public:
 	Mather(IplImage *src);
 	void  createTmplate(IplImage *templ);
 	void releaseTmplate(IplImage *tmpl);
 	~Mather();
-
 	//匹配方法如下：
 	//CV_TM_SQDIFF        =0,平方差匹配
 	//CV_TM_SQDIFF_NORMED =1,归一化平方差匹配
@@ -31,12 +32,24 @@ public:
 	void CalcMatherRect(CvRect sampleRect);
 	void markTmpRect();
 	void showPic();
-
+	void setMaxAngle(int angle);
+	double getFindAngle();
+protected:
+	static int m_totTmplateNum;
 private:
 	IplImage *m_src;
 	IplImage *m_cpsrc;
 	int m_maxTol;//按一定角度算出最大长度时的上限偏移
+	
 	int m_iterTemplate;
+	int m_deltWidth;
+	int m_deltHeight;
+	int m_maxAngle;//最大允许角度，用来限制m_matherRect的大小。
+	int m_resultAngle;//最终计算出的角度
+	CvPoint m_absolutePt;//在母板中的坐标
+	CvPoint m_relativePt;//在临时m_matherRect中的相对坐标
+	CvPoint m_leftMatchPt;//在母板中最左边匹配的坐标
+	CvPoint m_rightMatchPt;//在母板中最右边匹配的坐标
 public:
 	IplImage *m_template;
 	CvRect m_matherRect;

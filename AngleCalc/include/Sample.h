@@ -4,10 +4,12 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-
+#include "Mather.h"
 class Sample
 {
+
 public:
+	friend class Mather;
 	Sample(IplImage *mather, IplImage *sample);
 	~Sample();
 	void getPrmFromMather(IplImage *mather);

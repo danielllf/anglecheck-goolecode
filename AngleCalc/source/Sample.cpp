@@ -39,6 +39,7 @@ void Sample::initTmplate(int starLine, CvSize templateSize)
 	m_iterTemplate = 0;
 	m_rectTmplate = cvRect(0,starLine, templateSize.width,templateSize.height);
 	m_totTmplateNum = m_sample->width/templateSize.width;
+	Mather::m_totTmplateNum = m_totTmplateNum;
 	if(m_templateImg==NULL)
 	{
 		//init header
