@@ -1,6 +1,7 @@
 
 #include "mather.h"
-
+//#include <math.h>
+int Mather::m_totTmplateNum=0;
 Mather::Mather(IplImage *src)
 {
 		m_src = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
@@ -9,7 +10,7 @@ Mather::Mather(IplImage *src)
 		m_cpsrc = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
 		cvCopy(src,m_cpsrc);
 
-		m_maxTol = 80;//to be changed by future
+		//m_maxTol = 90;//to be changed by future
 		m_iterTemplate = 0;
 }
 Mather::~Mather()
@@ -46,15 +47,41 @@ void Mather::releaseSubSrc(IplImage **subSrc)
 {
 	cvReleaseImage(subSrc);
 }
-void Mather::CalcMatherRect(CvRect sampleRect)
+//max angle should < 20 degree
+void Mather::setMaxAngle(int angle)
 {
-	int newWidthtSrc = sampleRect.width+m_maxTol;
-	if (newWidthtSrc>=m_src->width)
-	{
-		newWidthtSrc = m_src->width - sampleRect.x-1;
+	assert(angle<20);//不使用大于20度的角
+	m_maxAngle = angle;
+	m_deltWidth = (m_src->height)*sin(m_maxAngle*CV_PI/180);
+
+}
+void Mather::CalcMatherRect(CvRect sampleRect)
+{//上下左右四个方向都留有余量
+	int upEge = 0;
+	int leftEge = 0;
+	int rightEge = 0;
+	int bottomEge = 0;
+	m_deltHeight = (sampleRect.x+sampleRect.width)*sin(m_maxAngle*CV_PI/180);
+	//up
+	if ((upEge = sampleRect.y-m_deltHeight)<=0){
+		upEge = 0;
 	}
-	m_matherRect =cvRect(sampleRect.x,sampleRect.y-m_maxTol,newWidthtSrc,sampleRect.height+2*m_maxTol);
-	m_iterTemplate+=1;
+	//left
+	if (( leftEge = sampleRect.x-m_deltWidth)<=0){
+		leftEge = 0;
+	}
+	//right
+	if((rightEge=sampleRect.width+sampleRect.x+m_deltWidth)>= m_src->width){
+			rightEge=m_src->width;
+	}
+	//bottom
+	if((bottomEge = sampleRect.y+sampleRect.height+m_deltHeight)>=m_src->height){
+		bottomEge = m_src->height;
+	}
+
+	m_matherRect =cvRect(leftEge, upEge, rightEge-leftEge,bottomEge-upEge);
+
+	
 }
 CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMethod, bool useNormed)
 {
@@ -173,9 +200,26 @@ CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMet
 	}
 	releaseSubSrc(&subSrc);
 	//printf("pos:%d,cnt:%d\n",temIter,temp);
-	return  resultPoints[temIter];
+	m_relativePt = resultPoints[temIter];
+	m_absolutePt = cvPoint(m_relativePt.x+m_matherRect.x, m_relativePt.y+m_matherRect.y);
+	if (0==m_iterTemplate)
+	{
+		m_leftMatchPt = m_absolutePt;
+	}
+	else if (m_totTmplateNum-1==m_iterTemplate)
+	{
+		m_rightMatchPt = m_absolutePt;
+		m_resultAngle = cvFastArctan(m_rightMatchPt.y-m_leftMatchPt.y,m_rightMatchPt.x-m_leftMatchPt.x);
+		//此处会有1度的误差.sample rect小时（匹配度误差大）角度误差小，rect大时，（匹配度误差小）角度误差大。
+		//m_resultAngle = cvFastArctan(m_rightMatchPt.y-m_leftMatchPt.y,m_rightMatchPt.x-m_leftMatchPt.x-100);
+	}
+	m_iterTemplate+=1;
+	return  m_absolutePt;
 }
-
+double Mather::getFindAngle()
+{
+	return m_resultAngle;
+}
 //color the rect
 void Mather::markTmpRect()
 {
