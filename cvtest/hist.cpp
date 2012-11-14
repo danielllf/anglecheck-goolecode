@@ -32,7 +32,7 @@
 
 #include <cv.h>
 #include <highgui.h>
-
+#if 0
 int main( int argc, char** argv ) {
 
     IplImage* src;
@@ -108,3 +108,4 @@ int main( int argc, char** argv ) {
     }
 }
 
+#endif

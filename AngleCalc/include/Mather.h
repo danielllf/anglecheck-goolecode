@@ -5,7 +5,7 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-//#include "Sample.h"
+#include "pencil.h"
 
 class Mather
 {
@@ -27,6 +27,7 @@ public:
 	//使用计算归一化法（区别于cvNormalize,this is just for display）可提高匹配精度，但计算量更大
 	//priorityMethod=0,2,4
 	CvPoint findMatchPoint(CvRect sampleRect, int nMethods=3, int priorityMethod=CV_TM_SQDIFF, bool useNormed=true);
+	CvPoint findMatchPointToGetCycle(CvRect stripRect,  int nMethods=3, int priorityMethod=CV_TM_SQDIFF, bool useNormed=true);
 	IplImage *getSubSrc(IplImage *src, CvRect rect);
 	void releaseSubSrc(IplImage **subSrc);
 	void CalcMatherRect(CvRect sampleRect);
@@ -34,11 +35,17 @@ public:
 	void showPic();
 	void setMaxAngle(int angle);
 	double getFindAngle();
+	int findMinCycle(int stripHeight,int startLine);
+	void mkLineColor(int starLine, int lineWight=5,int lineColor=255);
+	int findSampleHdrPos(IplImage *sample, CvRect sampleRect, int deltWidthShift=10);
+	CvPoint findMatchPointInCycle(CvRect stripRect, int  deltWidth, int nMethods=3, int priorityMethod=CV_TM_SQDIFF, bool useNormed=true);
+
+	//hdr_size.height 必须是3,5,7奇数
 protected:
 	static int m_totTmplateNum;
 private:
 	IplImage *m_src;
-	IplImage *m_cpsrc;
+	IplImage *m_cpsrc;//此图用来显示结果，不参与计算过程
 	int m_maxTol;//按一定角度算出最大长度时的上限偏移
 	
 	int m_iterTemplate;
@@ -50,8 +57,9 @@ private:
 	CvPoint m_relativePt;//在临时m_matherRect中的相对坐标
 	CvPoint m_leftMatchPt;//在母板中最左边匹配的坐标
 	CvPoint m_rightMatchPt;//在母板中最右边匹配的坐标
+	int m_minCycle;//最小循环
 public:
-	IplImage *m_template;
+	IplImage *m_samplePatchCopy;
 	CvRect m_matherRect;
 
 };

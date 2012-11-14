@@ -369,7 +369,7 @@ line_pair findMinCycle(const void* srcImg,int start_line_type, int jitter_tolera
 	int most_similar_line = -1;
 
 	//get the line pair
-	if (start_line_type==MIN)
+	if (start_line_type==MAX)
 	{
 		//find first line
 		tmp = findThejixiaoLine(srcImg,tmp.line_num,jitter_tolerance);

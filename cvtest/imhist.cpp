@@ -120,7 +120,7 @@ int main()
 	int hdrWidth = 30;
 	int hdrHeight = 11;//3,5,7...
 	int gradSlideTol = 2;
-	int targetLineNum = 400;
+	int targetLineNum = 200;
 	int gradStep =3;
 	 initParms();
 	initMatherHeaderSects(matherImg,hdrWidth,hdrHeight,gradStep);
