@@ -90,7 +90,7 @@ int find_sample_hdr_pos(IplImage *src,int target_line_num,int hdr_width,int hdr_
 
 /*
 *初始化mather图中所有header sec
-*
+*gradStep:梯度所分成的小区间所包含的像素
 */
 void initMatherHeaderSects(IplImage* matherImg,int headWidth,int headHeight,int gradStep);
 

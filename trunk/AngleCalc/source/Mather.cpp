@@ -2,8 +2,10 @@
 #include "mather.h"
 //#include <math.h>
 int Mather::m_totTmplateNum=0;
+
 Mather::Mather(IplImage *src)
 {
+		initParms();
 		m_src = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
 		cvCopy(src,m_src);
 
@@ -12,23 +14,57 @@ Mather::Mather(IplImage *src)
 
 		//m_maxTol = 90;//to be changed by future
 		m_iterTemplate = 0;
+		m_minCycle = 0;
 }
 Mather::~Mather()
 {
 		cvReleaseImage(&m_src);
 }
+int Mather::findMinCycle(int stripHeight,int startLine)
+{
+	IplImage *stripImg = cvCreateImageHeader(cvSize(m_src->width,stripHeight),m_src->depth,m_src->nChannels);
+	stripImg->imageData = m_src->imageData+m_src->widthStep*startLine;
+	stripImg->origin = m_src->origin;
+	stripImg->widthStep = m_src->widthStep;
 
-//this template mem is hold and released by mather objet manuely
+	createTmplate(stripImg);//get patch from sample
+	cvReleaseImageHeader(&stripImg);
+	CvRect stripRect = cvRect(0,startLine,m_src->width,stripHeight);
+	CvPoint pt = findMatchPointToGetCycle(stripRect,2);
+	int cycleHeight = pt.y - startLine;
+
+	
+	mkLineColor(startLine);
+	mkLineColor(startLine+cycleHeight);
+	m_minCycle = cycleHeight;
+	return cycleHeight;
+}
+int Mather::findSampleHdrPos(IplImage *sample, CvRect sampleRect, int deltWidthShift)
+{
+	//get sample hdr rect
+		IplImage *stripImg = cvCreateImageHeader(cvSize(sampleRect.width,sampleRect.height),sample->depth,sample->nChannels);
+		stripImg->imageData = sample->imageData+sample->widthStep*sampleRect.y;
+		stripImg->origin = sample->origin;
+		stripImg->widthStep = sample->widthStep;
+		createTmplate(stripImg);//get patch from sample
+		cvReleaseImageHeader(&stripImg);
+
+		CvPoint pt = findMatchPointInCycle(sampleRect, deltWidthShift ,2);
+
+		return pt.y;
+}
+//this template mem is hold and released by mather objet manualy
+//duplicate of sample rect,after create this, mather will not need sample in this turn
 void Mather:: createTmplate(IplImage *templ)
 {
-	m_template = cvCreateImage(cvSize(templ->width, templ->height),templ->depth, templ->nChannels);
-	cvCopy(templ,m_template);
+	m_samplePatchCopy = cvCreateImage(cvSize(templ->width, templ->height),templ->depth, templ->nChannels);
+	cvCopy(templ,m_samplePatchCopy);
 	
 }
 
 void Mather::releaseTmplate(IplImage *tmpl)
 {
-		cvReleaseImage(&m_template);
+		cvReleaseImage(&m_samplePatchCopy);
 }
 IplImage * Mather::getSubSrc( IplImage *src, CvRect rect)
 {
@@ -57,6 +93,7 @@ void Mather::setMaxAngle(int angle)
 }
 void Mather::CalcMatherRect(CvRect sampleRect)
 {//上下左右四个方向都留有余量
+
 	int upEge = 0;
 	int leftEge = 0;
 	int rightEge = 0;
@@ -83,6 +120,279 @@ void Mather::CalcMatherRect(CvRect sampleRect)
 
 	
 }
+CvPoint Mather:: findMatchPointInCycle(CvRect stripRect, int  deltWidth, int nMethods, int priorityMethod, bool useNormed)
+{
+	assert(m_minCycle!=0);
+	int hdrRectHeight = stripRect.x+m_minCycle;
+	if(hdrRectHeight>m_src->height)hdrRectHeight = m_src->height;
+	m_matherRect = cvRect(stripRect.x, stripRect.y,stripRect.width+deltWidth, hdrRectHeight);
+	IplImage *subSrc = getSubSrc(m_src,m_matherRect);
+
+	IplImage *ftmp[6]={NULL};
+	int method=0;
+	int patchx = m_samplePatchCopy->width;
+	int patchy = m_samplePatchCopy->height;
+	int iwidth = subSrc->width - patchx + 1;
+	int iheight = subSrc->height - patchy + 1;
+	if(nMethods==1)
+	{//priority
+		ftmp[priorityMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
+		if(useNormed)
+		{
+			ftmp[priorityMethod+1] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
+		}
+
+	}
+	else if (nMethods==2)
+	{//priority+1  method:0,2,4
+		int anotherMethod =((priorityMethod + 2) > 4) ?(priorityMethod - 2):(priorityMethod + 2);
+
+		ftmp[priorityMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
+		ftmp[anotherMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);	
+		if(useNormed)
+		{
+			ftmp[priorityMethod+1] = cvCreateImage( cvSize(iwidth,iheight),32,1);
+			ftmp[anotherMethod+1] = cvCreateImage( cvSize(iwidth,iheight),32,1);	
+		}
+	}
+	else
+	{//use all
+		for(int i=0; i<6; ++i){
+			if(!useNormed&&(1==i||3==i||5==i))continue;
+			ftmp[i] = cvCreateImage( cvSize(iwidth,iheight),32,1);
+		}
+	}
+
+	//DO THE MATCHING OF THE TEMPLATE WITH THE IMAGE
+	CvPoint resultPoints[6];
+#ifndef IMPOSSIBLE_CORRDINATE
+#define IMPOSSIBLE_CORRDINATE -1
+#endif
+	const CvPoint impossiblePt = cvPoint(IMPOSSIBLE_CORRDINATE,IMPOSSIBLE_CORRDINATE);
+
+	for(int i=0; i<6; ++i){
+		resultPoints[i] = impossiblePt;//
+
+		if(ftmp[i]==NULL)continue;
+		cvMatchTemplate( subSrc, m_samplePatchCopy, ftmp[i], i); 
+		double min,max;
+		CvPoint maxPoint,minPoint;
+		cvMinMaxLoc(ftmp[i],&min,&max,&minPoint, &maxPoint);
+		if (i <= 1){
+			resultPoints[i] = minPoint;
+		}
+		else{
+			resultPoints[i] = maxPoint;
+		}
+		//printf("(::%d,%d)\t",resultPoints[i]);
+
+		//printf("method:%d, find maxpoint(%d,%d), minPoint(%d,%d), min:%.3f,Max:%.3f\n",i,maxPoint.x,maxPoint.y, minPoint.x, minPoint.y, min, max);
+
+	}
+
+	//find the most likly point
+
+	int markArry[6] = {0};
+	for (int i=0;i<6;++i)
+	{
+		//printf("(%d,%d)\t",resultPoints[i]);
+		if (resultPoints[i].x == impossiblePt.x&&resultPoints[i].y == impossiblePt.y)continue;
+		else
+		{
+			if(markArry[i]==0)//0 代表尚未查找过自值
+			{
+				for (int j=i+1;j<6;j++)
+				{
+					if(resultPoints[j].x==resultPoints[i].x&&resultPoints[j].y==resultPoints[i].y)
+					{
+
+						markArry[i] += 1;
+						resultPoints[j] = impossiblePt;
+
+					}
+
+				}
+				markArry[i] +=1;//自己一个也要算上
+			}
+		}
+
+	}
+	int temIter = 0;
+	int temp=markArry[0];
+	for (int i=0;i<6;i++)
+	{
+		if(resultPoints[i].x == impossiblePt.x&&resultPoints[i].y == impossiblePt.y)continue;
+		if (markArry[i]>temp)
+		{
+			temp = markArry[i];
+			temIter = i;
+		}
+
+	}
+	//release img
+	for (int i = 0;i<6;i++)
+	{
+		if (ftmp[i]!=NULL)
+		{
+			cvReleaseImage(&ftmp[i]);
+		}
+
+	}
+	releaseSubSrc(&subSrc);
+	//printf("pos:%d,cnt:%d\n",temIter,temp);
+	m_relativePt = resultPoints[temIter];
+	m_absolutePt = cvPoint(m_relativePt.x+m_matherRect.x, m_relativePt.y+m_matherRect.y);
+	if (0==m_iterTemplate)
+	{
+		m_leftMatchPt = m_absolutePt;
+	}
+	else if (m_totTmplateNum-1==m_iterTemplate)
+	{
+		m_rightMatchPt = m_absolutePt;
+		m_resultAngle = cvFastArctan(m_rightMatchPt.y-m_leftMatchPt.y,m_rightMatchPt.x-m_leftMatchPt.x);
+		//此处会有1度的误差.sample rect小时（匹配度误差大）角度误差小，rect大时，（匹配度误差小）角度误差大。
+		//m_resultAngle = cvFastArctan(m_rightMatchPt.y-m_leftMatchPt.y,m_rightMatchPt.x-m_leftMatchPt.x-100);
+	}
+	m_iterTemplate+=1;
+	return  m_absolutePt;
+}
+
+
+CvPoint Mather:: findMatchPointToGetCycle(CvRect stripRect, int nMethods, int priorityMethod, bool useNormed)
+{
+	//CalcMatherRect(sampleRect);
+	m_matherRect = cvRect(stripRect.x, stripRect.y+stripRect.height,stripRect.width, m_src->height-stripRect.height-stripRect.y);
+	IplImage *subSrc = getSubSrc(m_src,m_matherRect);
+
+	IplImage *ftmp[6]={NULL};
+	int method=0;
+	int patchx = m_samplePatchCopy->width;
+	int patchy = m_samplePatchCopy->height;
+	int iwidth = subSrc->width - patchx + 1;
+	int iheight = subSrc->height - patchy + 1;
+	if(nMethods==1)
+	{//priority
+		ftmp[priorityMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
+		if(useNormed)
+		{
+			ftmp[priorityMethod+1] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
+		}
+
+	}
+	else if (nMethods==2)
+	{//priority+1  method:0,2,4
+		int anotherMethod =((priorityMethod + 2) > 4) ?(priorityMethod - 2):(priorityMethod + 2);
+
+		ftmp[priorityMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);		
+		ftmp[anotherMethod] = cvCreateImage( cvSize(iwidth,iheight),32,1);	
+		if(useNormed)
+		{
+			ftmp[priorityMethod+1] = cvCreateImage( cvSize(iwidth,iheight),32,1);
+			ftmp[anotherMethod+1] = cvCreateImage( cvSize(iwidth,iheight),32,1);	
+		}
+	}
+	else
+	{//use all
+		for(int i=0; i<6; ++i){
+			if(!useNormed&&(1==i||3==i||5==i))continue;
+			ftmp[i] = cvCreateImage( cvSize(iwidth,iheight),32,1);
+		}
+	}
+
+	//DO THE MATCHING OF THE TEMPLATE WITH THE IMAGE
+	CvPoint resultPoints[6];
+#ifndef IMPOSSIBLE_CORRDINATE
+#define IMPOSSIBLE_CORRDINATE -1
+#endif
+	const CvPoint impossiblePt = cvPoint(IMPOSSIBLE_CORRDINATE,IMPOSSIBLE_CORRDINATE);
+
+	for(int i=0; i<6; ++i){
+		resultPoints[i] = impossiblePt;//
+
+		if(ftmp[i]==NULL)continue;
+		cvMatchTemplate( subSrc, m_samplePatchCopy, ftmp[i], i); 
+		double min,max;
+		CvPoint maxPoint,minPoint;
+		cvMinMaxLoc(ftmp[i],&min,&max,&minPoint, &maxPoint);
+		if (i <= 1){
+			resultPoints[i] = minPoint;
+		}
+		else{
+			resultPoints[i] = maxPoint;
+		}
+		//printf("(::%d,%d)\t",resultPoints[i]);
+
+		//printf("method:%d, find maxpoint(%d,%d), minPoint(%d,%d), min:%.3f,Max:%.3f\n",i,maxPoint.x,maxPoint.y, minPoint.x, minPoint.y, min, max);
+
+	}
+
+	//find the most likly point
+
+	int markArry[6] = {0};
+	for (int i=0;i<6;++i)
+	{
+		//printf("(%d,%d)\t",resultPoints[i]);
+		if (resultPoints[i].x == impossiblePt.x&&resultPoints[i].y == impossiblePt.y)continue;
+		else
+		{
+			if(markArry[i]==0)//0 代表尚未查找过自值
+			{
+				for (int j=i+1;j<6;j++)
+				{
+					if(resultPoints[j].x==resultPoints[i].x&&resultPoints[j].y==resultPoints[i].y)
+					{
+
+						markArry[i] += 1;
+						resultPoints[j] = impossiblePt;
+
+					}
+
+				}
+				markArry[i] +=1;//自己一个也要算上
+			}
+		}
+
+	}
+	int temIter = 0;
+	int temp=markArry[0];
+	for (int i=0;i<6;i++)
+	{
+		if(resultPoints[i].x == impossiblePt.x&&resultPoints[i].y == impossiblePt.y)continue;
+		if (markArry[i]>temp)
+		{
+			temp = markArry[i];
+			temIter = i;
+		}
+
+	}
+	//release img
+	for (int i = 0;i<6;i++)
+	{
+		if (ftmp[i]!=NULL)
+		{
+			cvReleaseImage(&ftmp[i]);
+		}
+
+	}
+	releaseSubSrc(&subSrc);
+	//printf("pos:%d,cnt:%d\n",temIter,temp);
+	m_relativePt = resultPoints[temIter];
+	m_absolutePt = cvPoint(m_relativePt.x+m_matherRect.x, m_relativePt.y+m_matherRect.y);
+	if (0==m_iterTemplate)
+	{
+		m_leftMatchPt = m_absolutePt;
+	}
+	else if (m_totTmplateNum-1==m_iterTemplate)
+	{
+		m_rightMatchPt = m_absolutePt;
+		m_resultAngle = cvFastArctan(m_rightMatchPt.y-m_leftMatchPt.y,m_rightMatchPt.x-m_leftMatchPt.x);
+		//此处会有1度的误差.sample rect小时（匹配度误差大）角度误差小，rect大时，（匹配度误差小）角度误差大。
+		//m_resultAngle = cvFastArctan(m_rightMatchPt.y-m_leftMatchPt.y,m_rightMatchPt.x-m_leftMatchPt.x-100);
+	}
+	m_iterTemplate+=1;
+	return  m_absolutePt;
+}
+
 CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMethod, bool useNormed)
 {
 	CalcMatherRect(sampleRect);
@@ -90,8 +400,10 @@ CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMet
 
 	IplImage *ftmp[6]={NULL};
 	int method=0;
-	int patchx = m_template->width;
-	int patchy = m_template->height;
+	//int patchx = m_samplePatchCopy->width;
+	//int patchy = m_samplePatchCopy->height;
+	int patchx = sampleRect.width;
+	int patchy = sampleRect.height;
 	int iwidth = subSrc->width - patchx + 1;
 	int iheight = subSrc->height - patchy + 1;
 	if(nMethods==1)
@@ -134,7 +446,7 @@ CvPoint Mather:: findMatchPoint(CvRect sampleRect, int nMethods, int priorityMet
 		resultPoints[i] = impossiblePt;//
 		
 		if(ftmp[i]==NULL)continue;
-		cvMatchTemplate( subSrc, m_template, ftmp[i], i); 
+		cvMatchTemplate( subSrc, m_samplePatchCopy, ftmp[i], i); 
 		double min,max;
 		CvPoint maxPoint,minPoint;
 		cvMinMaxLoc(ftmp[i],&min,&max,&minPoint, &maxPoint);
@@ -234,4 +546,11 @@ void Mather::showPic()
 {
 	cvNamedWindow("mather");
 	cvShowImage("mather",m_cpsrc);
+}
+void Mather::mkLineColor(int starLine, int lineWight,int lineColor)
+{
+	cvSetImageROI(m_cpsrc,cvRect(0,starLine,m_src->width,lineWight));
+	//cvAddS(m_cpsrc,cvScalar(100),m_cpsrc);
+	cvSet(m_cpsrc,cvScalar(lineColor));
+	cvResetImageROI(m_cpsrc);
 }

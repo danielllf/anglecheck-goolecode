@@ -8,11 +8,11 @@
 int main()
 {
 	IplImage *dst_bw=NULL;
-	parse_configfile("calangle.conf");
-
+	//parse_configfile("calangle.conf");
+initParms();
 
 	//得到单通道灰度图像
-	IplImage *src = cvLoadImage("geZiBu320.jpg",CV_LOAD_IMAGE_GRAYSCALE);
+	IplImage *src = cvLoadImage("../cvtest/test4.jpg",0);
 	//IplImage *src = cvLoadImage("lianpeng.jpg",CV_LOAD_IMAGE_GRAYSCALE);
 	if(!src)	perror("erro file\n");
 	cvNamedWindow("src",CV_WINDOW_AUTOSIZE);
@@ -36,7 +36,8 @@ int main()
 	cvShowImage("blackw",dst_bw);
 
 	//形态学操作。腐蚀，膨胀
-	IplImage *erd = cvCreateImage( cvGetSize(dst_bw), dst_bw->depth, dst_bw->nChannels);
+	//IplImage *erd = cvCreateImage( cvGetSize(dst_bw), dst_bw->depth, dst_bw->nChannels);
+	IplImage *erd = cvCreateImage( cvGetSize(src1), src1->depth, src1->nChannels);
 	IplImage *src_erode = cvCreateImage( cvGetSize(erd), erd->depth, erd->nChannels);
 	IplConvKernel *element = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_CROSS, 0);
     
@@ -51,8 +52,8 @@ int main()
 	////求最小cycle
 	line_pair pair = findMinCycle(src_erode,start_line_type,jitter_tolerance,slide_tolerance);
 	printf("mincycle start:%d,end:%d,diff_sum:%d\n",pair.start_num,pair.end_num,pair.slid_sum_diff);
-	mklinecolor(&ma,pair.start_num,color_line_tolerance,line_color);
-	mklinecolor(&ma,pair.end_num,color_line_tolerance,line_color);
+	mklinecolor(&ma,pair.start_num,1,255);
+	mklinecolor(&ma,pair.end_num,1,255);
 
 	cvNamedWindow("blkline");
 	cvShowImage("blkline",src_erode);
