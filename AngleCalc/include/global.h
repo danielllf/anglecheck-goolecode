@@ -15,6 +15,7 @@
 #include "mather.h"
 #include "Sample.h"
 #include "pencil.h"
+#include "AvgBackGround.h"
 
 
 #endif

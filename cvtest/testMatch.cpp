@@ -1,7 +1,19 @@
 
 #include "global.h"
 
-#if 1
+int main()
+{
+	IplImage *src, *newsample;
+
+	//get the src
+	if ((src = cvLoadImage("../cvtest/rotate degree0.00.jpg",0))==NULL)printf("load src erro\n");
+	if ((newsample = cvLoadImage("../cvtest/cprotate degree0.00.jpg",0))==NULL)printf("load src erro\n");
+	AvgBackGround avg(src,newsample,3);
+	avg.backgroundDiff();
+	avg.showImg();
+	return 0;
+}
+#if 0
 int main( int argc, char** argv ) {
 
 	IplImage *src, *templ,*ftmp[6], *srcImg; //ftmp is what to display on
@@ -11,7 +23,6 @@ int main( int argc, char** argv ) {
 
 	//get the src
 	if ((src = cvLoadImage("../cvtest/rotate degree0.00.jpg",0))==NULL)printf("load src erro\n");
-
 
 	Mather *mather = new Mather(src);
 	mather->setMaxAngle(5);
