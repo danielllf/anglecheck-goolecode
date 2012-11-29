@@ -87,4 +87,9 @@ int parse_configfile(const char* filename);
 //用线来划分图像
 void formatImg(IplImage* img,int pitch, int line_thick=1);
 
+//从指定图像src的rect区域中拷贝图像.并返回
+//因在内部分配图像空间，所以使用完后应该用cvReleaseImge手动释放返回的图像指针
+//rect:位于源图像src中的矩形区域
+IplImage * g_CopyRectFromImg( IplImage *src, CvRect rect);
+
 #endif

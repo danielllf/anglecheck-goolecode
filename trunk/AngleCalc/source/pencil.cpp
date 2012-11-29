@@ -222,7 +222,9 @@ int freeMatherHeadSecs()
 			llf_error("failed tofreeMatherHeadSec[%d]",i);
 			return -1;
 		}
+
 	}
+	return 0;
 }
 Section_t* getMatherSecByIdx(int idx)
 {
