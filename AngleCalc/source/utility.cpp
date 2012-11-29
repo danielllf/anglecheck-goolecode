@@ -275,3 +275,18 @@ void formatImg(IplImage* img,int pitch, int line_thick)
 
 	}
 }
+
+IplImage * g_CopyRectFromImg( IplImage *src, CvRect rect)
+{
+	IplImage *subROI = cvCreateImageHeader(
+		cvSize(rect.width,rect.height),src->depth,src->nChannels);
+	
+	(subROI)->origin = src->origin;
+	(subROI)->widthStep = src->widthStep;
+	subROI->imageData =  src->imageData + rect.y*src->widthStep +	rect.x;
+
+	IplImage * subSrc = cvCreateImage(cvSize(subROI->width,subROI->height),subROI->depth,subROI->nChannels);
+	cvCopy(subROI,subSrc);
+	cvReleaseImageHeader(&subROI);
+	return subSrc;
+}

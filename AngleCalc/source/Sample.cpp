@@ -1,69 +1,56 @@
 #include "Sample.h"
+#include "utility.h"
 
-Sample::Sample(IplImage *mather, IplImage *sample)
+//此类操作对象不应包含背景信息
+//sample中，采样图中的多个子矩形区域中的一个叫做：patch
+//sample中应该为从背景中取出的布匹（前景图）
+Sample::Sample(SampleWithBackGroud  &swbg)
 {
 
-	m_templateImg=NULL;
-	getPrmFromMather(mather);
-	loadSamplePic(sample);
-
+	m_patchImg=NULL;
+	m_iterTemplate = 0;
+	m_totPatchNum = 0;
+	m_sample = m_sampleBeforeShrink = g_CopyRectFromImg(swbg.InewSample, swbg.getBoundingRect());
+	
 }
 Sample::~Sample()
 {
-	cvReleaseImageHeader(&m_templateImg);
+	cvReleaseImageHeader(&m_patchImg);
 	cvReleaseImage(&m_sample);
-}
-
-//prepair for the ROI param
-void Sample::getPrmFromMather(IplImage *mather)
-{
-	//sholud be same as the sample pic
-	m_nChannels = mather->nChannels;
-	m_depth = mather->depth;
-	m_widthStep = mather->widthStep;
+	cvReleaseImage(&m_sampleBeforeShrink);
 }
 
 
-//may load dynamicly on realtime running
-void Sample::loadSamplePic(IplImage *sample)
+
+void Sample::shrinkSample(int shrinkTol_x, int shrinkTol_y)
 {
-	m_sample = cvCreateImage(cvSize(sample->width,sample->height),sample->depth, sample->nChannels);
-	cvCopy(sample,m_sample);
+   //update sample rect
+	CvRect shinkedRect = cvRect(shrinkTol_x, shrinkTol_y,
+										m_sampleBeforeShrink->width-2*shrinkTol_x, m_sampleBeforeShrink->height-2*shrinkTol_y);
+	//update other related parms
+	m_sample = g_CopyRectFromImg(m_sampleBeforeShrink, shinkedRect);
+
+}
+void Sample::setPatchNum(int num)
+{
+	m_totPatchNum = num;
+	int patchWidth = m_sample->width/m_totPatchNum;
+	int patchHeight = m_sample->height;
+	m_patchSize = cvSize(patchWidth, patchHeight);
+	//init the 1st patch
+	m_rectPatch = cvRect(0,0,m_patchSize.width,m_patchSize.height);
 }
 
 
-void Sample::initTmplate(int starLine, CvSize templateSize)
+int Sample::getPatchImg(IplImage ** temp)
 {
-	m_tmplateSize = templateSize;
-	m_cmpStartLine = starLine;
-	m_iterTemplate = 0;
-	m_rectTmplate = cvRect(0,starLine, templateSize.width,templateSize.height);
-	m_totTmplateNum = m_sample->width/templateSize.width;
-	Mather::m_totTmplateNum = m_totTmplateNum;
-	if(m_templateImg==NULL)
+	assert(m_totPatchNum!=0);
+	if (m_iterTemplate<m_totPatchNum)
 	{
-		//init header
-		m_templateImg = cvCreateImageHeader(
-			m_tmplateSize,
-			m_depth,
-			m_nChannels);	
-		m_templateImg->origin = m_sample->origin;
-		m_templateImg->widthStep = m_sample->widthStep;
-	}
+		*temp = g_CopyRectFromImg(m_sample,m_rectPatch);
+		printf("sample patch rect:(%d,%d,%d,%d)\t",m_rectPatch.x,m_rectPatch.y,m_rectPatch.width, m_rectPatch.height);
 
-
-}
-
-//创建ROI，并赋于数据
-int Sample::getTmplate(IplImage ** temp)
-{
-	if (m_iterTemplate<m_totTmplateNum)
-	{
-		m_templateImg->imageData = m_sample->imageData + m_rectTmplate.y*m_sample->widthStep +	m_rectTmplate.x;		
 		++m_iterTemplate;
-		printf("template:(%d,%d)\t",m_rectTmplate.x,m_rectTmplate.y);
-
-		*temp=m_templateImg;
 		
 		return 0;	
 	}
@@ -73,21 +60,23 @@ int Sample::getTmplate(IplImage ** temp)
 	}
 }
 
-//color the rect
-void Sample::markTmpRect()
+void Sample::stepTmplate()
 {
-	cvSetImageROI(m_sample,m_rectTmplate);
+	//right move rect 
+	m_rectPatch.x += m_patchSize.width;
+}
+
+//color the rect
+void Sample::markPatchRect()
+{
+	cvSetImageROI(m_sample,m_rectPatch);
 	if(m_iterTemplate%2==0)
 		cvAddS(m_sample,cvScalar(100),m_sample);
 	else
 		cvAddS(m_sample,cvScalar(-100),m_sample);
 	cvResetImageROI(m_sample);
 }
-void Sample::stepTmplate()
-{
-	//right move rect 
-	m_rectTmplate.x += m_tmplateSize.width;
-}
+
 void Sample::showPic()
 {
 	cvNamedWindow("sample");
