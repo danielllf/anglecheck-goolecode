@@ -71,11 +71,6 @@ void trace(int level, const char *fmt, ...);
 //与trace类似，只是没加入等级控制
  void llf_error (const char *fmt, ...);
 
-//用来打印一个矩阵
-void PrintMat(CvMat* A);
-
-//用来打印一个矩阵,参数为Mat，只打单通道
-void PrintMat2(Mat* m);
 
 //color all lines within line_num+/-tolerance
 void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int color);
@@ -91,5 +86,16 @@ void formatImg(IplImage* img,int pitch, int line_thick=1);
 //因在内部分配图像空间，所以使用完后应该用cvReleaseImge手动释放返回的图像指针
 //rect:位于源图像src中的矩形区域
 IplImage * g_CopyRectFromImg( IplImage *src, CvRect rect);
+
+//this func only used to debug
+//rect: rect to be show on img
+//img: the src imge(would not be affected) which is the source of the showed img
+//显示的图片在此函数退出前会自动销毁，无需再释放
+void debug_showImgRect(IplImage *showImgSrc, CvRect rect);
+
+/**
+*初始化所有配置参数，由配置文件读入
+*/
+void initParms();
 
 #endif

@@ -6,7 +6,9 @@
 #include "highgui.h"
 #include "cxcore.h"
 #include "cv_yuv_codebook.h"
-class SampleWithBackGroud{
+#include "ImgeBase.h"
+class SampleWithBackGroud:public ImageBase
+{
 
 public:
 	//avgback为前景模型，newsample为新的采样图
@@ -19,6 +21,7 @@ void backgroundDiffllf() ; //Mask should be grayscale
 CvRect calcBoundingRect();//计算前景的外接矩形
 CvRect getBoundingRect();//获取前景的外接矩形（前面已经计算好了）
 void showImg();
+virtual IplImage *getImage();
 public:
 	IplImage  *InewSample;
 

@@ -5,9 +5,8 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-#include "pencil.h"
-
-class Mather
+#include "ImgeBase.h"
+class Mather:public ImageBase
 {
 	friend class Sample;
 public:
@@ -47,12 +46,12 @@ public:
 	void mkLineColor(int starLine, int lineWight=5,int lineColor=255);
 	//在mather中查找sample中位于sampleRect区域图像的位置
 	int findSampleHdrPos(IplImage *sample, CvRect stripHdrRect, int deltWidthShift=10);
-
+	IplImage *getImage();
 	//hdr_size.height 必须是3,5,7奇数
 
 private:
-	IplImage *m_src;
-	IplImage *m_cpsrc;//此图用来显示结果，不参与计算过程
+	IplImage *m_mather;
+	
 	int m_maxTol;//按一定角度算出最大长度时的上限偏移
 	int m_sampleHdrMatchLine;//以此为基准进行向右匹配
 	int m_iterTemplate;
@@ -68,6 +67,7 @@ private:
 	CvSize m_samplePatchSize;
 	int m_totTmplateNum;
 public:
+	IplImage *m_cpsrc;//此图用来显示结果，不参与计算过程
 	IplImage *m_samplePatchCopy;
 	CvRect m_matherRect;
 

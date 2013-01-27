@@ -40,8 +40,11 @@ int main(int argc, char* argv[])
  
     /* the first command line parameter must be image file name */
  
-        src = cvLoadImage("geZiBu320.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-		if(!src)perror("erro file\n");
+        src = cvLoadImage("../cvtest/3mather.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+		if(!src)
+		{perror("erro file\n");
+		exit(0);
+		}
     
     cvNamedWindow( "src", CV_WINDOW_AUTOSIZE );
     cvShowImage( "src", src );
@@ -73,10 +76,11 @@ printf("gray->nchanel:%d,depth:%d\n",dst_gray->nChannels,dst_gray->depth);
 	
     dst_bw = cvCreateImage( cvGetSize(src), src->depth, src->nChannels);
 printf("src->nchanel:%d,depth:%d\n",dst_bw->nChannels,dst_bw->depth);
-    cvThreshold( dst_gray, dst_bw ,50, 255, CV_THRESH_BINARY ); //取阈值为50把图像转为二值图像
+   // cvThreshold( dst_gray, dst_bw ,50, 255, CV_THRESH_BINARY ); //取阈值为50把图像转为二值图像
  
-    //cvAdaptiveThreshold( dst_gray, dst_bw, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 3, 5 );
+    cvAdaptiveThreshold( dst_gray, dst_bw, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 27, 5 );
  
+	cvSaveImage("dst_bw.jpg",dst_bw);
     cvNamedWindow( "dst_bw", CV_WINDOW_AUTOSIZE );
     cvShowImage( "dst_bw", dst_bw );
  
