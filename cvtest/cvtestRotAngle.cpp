@@ -1,7 +1,6 @@
 // cvTest1.cpp : 定义控制台应用程序的入口点。
 //
 
-#include "stdafx.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
@@ -10,7 +9,7 @@
 #include <cxcore.h>
 #include <highgui.h>
 
-#define  DST_NUM 21
+#define  DST_NUM 10
 #define MAX_WIN_NAME_LEN 50
 
 using namespace cv;
@@ -27,7 +26,7 @@ int main( int argc, char** argv )
 	Mat src, rotate_dst[DST_NUM];
 
 	/// 加载源图像
-	src = imread( "geZiBu.jpg", 0 );
+	src = imread( "../cvtest/miorg.jpg", 0 );
 
 	//设置RIO
 	//cvSetImageROI(&IplImage(src),cvRect(0,10,IplImage(src).width,20));
@@ -57,7 +56,7 @@ int main( int argc, char** argv )
 	while(i<DST_NUM)
 	{
 		memset(rotate_window[i],0,MAX_WIN_NAME_LEN);
-		sprintf(rotate_window[i],"rotate degree%-3.2f.jpg",angle);
+		sprintf(rotate_window[i],"imrotate degree%-3.2f.jpg",angle);
 		
 		rot_mat = getRotationMatrix2D( center, -angle, scale );
 		warpAffine( src, rotate_dst[i], rot_mat, src.size());///旋转src的图像

@@ -91,11 +91,18 @@ IplImage * g_CopyRectFromImg( IplImage *src, CvRect rect);
 //rect: rect to be show on img
 //img: the src imge(would not be affected) which is the source of the showed img
 //显示的图片在此函数退出前会自动销毁，无需再释放
-void debug_showImgRect(IplImage *showImgSrc, CvRect rect);
+void g_showImgRect(IplImage *showImgSrc, CvRect rect);
 
 /**
 *初始化所有配置参数，由配置文件读入
 */
 void initParms();
 
+//从sample获取presample图
+//picName:生成的图片名字
+//filename:sample路径
+void g_getPresample(const char* filename,int startline,int height, const char* result_picName);
+
+//缩放图像
+IplImage* g_resizeImage(IplImage* src,float scale);
 #endif

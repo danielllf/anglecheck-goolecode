@@ -7,11 +7,14 @@
 
 class ImageBase
 {
-
+	
 public:
 	ImageBase();
 	~ImageBase();
 	virtual IplImage *getImage()=0;
+public:
+
+	int saveImageToFile(const char* filename);
 
 };
 #endif

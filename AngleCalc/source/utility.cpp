@@ -206,20 +206,21 @@ void formatImg(IplImage* img,int pitch, int line_thick)
 
 IplImage * g_CopyRectFromImg( IplImage *src, CvRect rect)
 {
+	assert(rect.width<=src->width&&rect.height<=src->height);
 	IplImage *subROI = cvCreateImageHeader(
 		cvSize(rect.width,rect.height),src->depth,src->nChannels);
 	
 	(subROI)->origin = src->origin;
 	(subROI)->widthStep = src->widthStep;
 	subROI->imageData =  src->imageData + rect.y*src->widthStep +	rect.x;
-
+ 
 	IplImage * subSrc = cvCreateImage(cvSize(subROI->width,subROI->height),subROI->depth,subROI->nChannels);
 	cvCopy(subROI,subSrc);
 	cvReleaseImageHeader(&subROI);
 	return subSrc;
 }
 
-void debug_showImgRect(IplImage *showImgSrc, CvRect rect)
+void g_showImgRect(IplImage *showImgSrc, CvRect rect)
 {
 	IplImage *imgToShow = cvCreateImage(cvGetSize(showImgSrc),showImgSrc->depth, showImgSrc->nChannels);
 	cvCopy(showImgSrc, imgToShow);
@@ -230,4 +231,28 @@ void debug_showImgRect(IplImage *showImgSrc, CvRect rect)
 	IMG_SHOW("临时调试图像",imgToShow);
 	cvWaitKey();
 	cvReleaseImage(&imgToShow);
+}
+void g_getPresample(const char* filename,int startline,int height, const char* result_picName)
+{
+	IplImage *presample;
+	if ((presample = cvLoadImage(filename,0))==NULL)printf("load src erro\n");
+	cvSetImageROI(presample,cvRect(0,startline,presample->width,height));
+	cvSet(presample,cvScalar(0));
+	cvResetImageROI(presample);
+	cvSaveImage(result_picName,presample);
+	 
+}
+IplImage* g_resizeImage(IplImage* src,float scale)
+{
+
+	IplImage *dst = 0;			//目标图像指针
+	CvSize dst_cvsize;			//目标图像尺寸
+
+	dst_cvsize.width = src->width * scale;		//目标图像的宽为源图象宽的scale倍
+	dst_cvsize.height = src->height * scale;	//目标图像的高为源图象高的scale倍
+
+	dst = cvCreateImage( dst_cvsize, src->depth, src->nChannels);	//构造目标图象
+	cvResize(src, dst, CV_INTER_LINEAR);	//缩放源图像到目标图像
+	return dst;
+	//cvReleaseImage(&dst);
 }

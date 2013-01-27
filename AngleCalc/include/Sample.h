@@ -13,21 +13,23 @@ class Sample:public ImageBase
 public:
 	//friend class Mather;
 	
-	Sample(IplImage *SampleSrc, CvRect rectInSrc);
+	Sample(IplImage *SampleSrc, CvRect rectInSrc,float scale=1.0);
 	~Sample();
 	//void getPrmFromMather(IplImage *mather);
 	//void loadSamplePic(IplImage *sample);
-	void shrinkSample(int left, int right, int top, int bottom);
+	int shrinkSample(int left, int right, int top, int bottom);
 	void setPatchNum(int num);
 
 	/*return:0 成功获取
 	*			-1：获取失败
 	*/
 	int getPatchImg(IplImage ** temp);
+	int getLastPatch_x_cordinate();
 	void markPatchRect();
 	void stepTmplate();
 	void showPic();
 	IplImage *getImage();
+
 	CvRect m_rectPatch;
 
 	

@@ -9,7 +9,7 @@
 //#include <stdio.h>
 //#include "statistic.h"
 #include "MatherPic.h"
-#include "linklist.h"
+//#include "linklist.h"
 //#include "testarray.h"
 #include "utility.h"
 #include "mather.h"
