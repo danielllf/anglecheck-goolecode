@@ -1,5 +1,6 @@
 
 #include "global.h"
+#include <windows.h> 
 #if 0
 int main()
 {
@@ -21,8 +22,16 @@ int main( int argc, char** argv ) {
 
 	IplImage *src,*ftmp[6], *srcImg; //ftmp is what to display on
 	IplImage *back, *newsample;
+	int methodCount = 2;//1,2,3
+	//此实验中CV_TM_CCOEFF为最佳方法
+	int priorityMethod = CV_TM_CCOEFF;//CV_TM_SQDIFF,CV_TM_CCORR,CV_TM_CCOEFF,
+	bool useNormaled = true;
+	int priorityMethod_getCycle=CV_TM_CCOEFF;
+	int assumedMinCycle = 50;//针对小循环可设小些，如5，大循环应该设大些，如50
+	int stripHeightTofindCycle = 60;//条越宽，其与周围像素的关联性越大，其唯一性增强。
+	float imgeScale = 0.5;
+	//g_getPresample("../cvtest/4newsample5.jpg",60,100,"4back5.jpg");return 0;
 	
-
 	//get the sample rect from the background diff
 	if ((back = cvLoadImage("../cvtest/3back.jpg",0))==NULL)printf("load src erro\n");
 	if ((newsample = cvLoadImage("../cvtest/3newsample.jpg",0))==NULL)printf("load src erro\n");
@@ -31,38 +40,50 @@ int main( int argc, char** argv ) {
 	CvRect  boundRect = avg.calcBoundingRect();
 	printf("forground rect(%d,%d,%d,%d)\n",boundRect.x,boundRect.y, boundRect.width, boundRect.height);
 
-	//get  the template to be used for matching:
 	//load the mather
-	//if ((src = cvLoadImage("../cvtest/3mather.jpg",0))==NULL)printf("load src erro\n");
 	if ((src = cvLoadImage("../cvtest/3mather.jpg",0))==NULL)printf("load src erro\n");
-	Mather *mather = new Mather(src);
+
+	Mather *mather = new Mather(g_resizeImage(src,imgeScale));
+	cvReleaseImage(&src);
+
+
 	mather->setMaxAngle(5);
-	int cycle_height = mather->findMinCycle(110,10);
+	int cycle_height = mather->findMinCycle(stripHeightTofindCycle,0,assumedMinCycle,priorityMethod_getCycle,useNormaled);
 	printf("cycle height:%d\n",cycle_height);
 	//getchar();
 #if 1
+	//获取当前时间
+	SYSTEMTIME sys; 
+	GetLocalTime( &sys ); 
+	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
 	//find sample hdr in mather
 
-	Sample sample(avg.InewSample, avg.getBoundingRect());
-	sample.shrinkSample(5,5,5,50);
-	 sample.setPatchNum(10);
+	Sample sample(avg.InewSample, avg.getBoundingRect(),imgeScale);
+
+
+	mather->catchSample(&sample);
+	mather->getSampleShinked(5,5,5,50);
 	 mather->setTmplateNum(10);
-	CvRect hdrrect = cvRect(0,0,sample.getImage()->width/3,sample.getImage()->height);
-	//debug_showImgRect(sample.getImage(),hdrrect);
-	int hdrPos = mather->findSampleHdrPos(sample.getImage(),hdrrect,20);
-	
+
+	int hdrPos = mather->findSampleHdrPos(3,25,methodCount,priorityMethod,useNormaled);
 	printf("hdrpos:%d\n",hdrPos);
-	mather->mkLineColor(hdrPos,3);
+
+
+	GetLocalTime( &sys ); 
+	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
+	mather->mkLineColor(hdrPos,2,0);
 	
 	IplImage *samplePatchImg;
-	IplImage *result = cvCloneImage(src);
+	IplImage *result = cvCloneImage(mather->getImage());
 	
 	int i=0;
 	while(sample.getPatchImg(&samplePatchImg)!=-1)
 	{
 		mather->fetchSamplePatchImg(samplePatchImg);
  
-		CvPoint pt = mather->findMatchPoint(sample.m_rectPatch.x,3,CV_TM_CCOEFF);
+		CvPoint pt = mather->MatchPatch(sample.m_rectPatch.x,methodCount,priorityMethod,useNormaled);
 
 		printf("find mather 绝对 pt(%d,%d)\n",pt.x,pt.y);
 		mather->releaseSamplePatchCopy(&samplePatchImg);
@@ -74,7 +95,7 @@ int main( int argc, char** argv ) {
 		if (i%2==0)
 			cvAddS(result,cvScalar(ADD_VALUE),result);
 		else
-			cvAddS(result,cvScalar(-ADD_VALUE),result);
+			cvAddS(result,cvScalar(-ADD_VALUE/2),result);
 	
 		cvResetImageROI(result);
 		//mark rect with color
@@ -86,13 +107,24 @@ int main( int argc, char** argv ) {
 	}
 	printf("find angle:%.2f\n",mather->getFindAngle());
 
-	avg.showImg();
-	sample.showPic();
-	mather->showPic();
 
+	GetLocalTime( &sys ); 
+	printf( "end...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
+	//avg.showImg();
+	sample.showPic();	
+	mather->showPic();
 	cvNamedWindow("findresult");
 	cvShowImage("findresult",result);
+
+	sample.saveImageToFile("sample.jpg");
+	mather->saveImageToFile("mather.jpg");
+	cvSaveImage("matherafter.jpg",mather->m_cpsrc);
+	cvSaveImage("result.jpg",result);
+
+
 	cvWaitKey();
+	//getchar();
 #endif		
 	
 }

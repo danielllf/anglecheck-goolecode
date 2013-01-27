@@ -5,14 +5,19 @@
 //sample中，采样图中的多个子矩形区域中的一个叫做：patch
 //sample中应该为从背景中取出的布匹（前景图）
 
-Sample::Sample(IplImage *SampleSrc, CvRect rectInSrc)
+Sample::Sample(IplImage *SampleSrc, CvRect rectInSrc,float scale)
 {
 
 	m_patchImg=NULL;
 	m_iterTemplate = 0;
 	m_totPatchNum = 0;
 	m_sample = m_sampleBeforeShrink = g_CopyRectFromImg(SampleSrc, rectInSrc);
-
+	if(scale!=1.0)
+	{ 
+		m_sampleBeforeShrink = m_sample = g_resizeImage(m_sample,scale);
+		//cvReleaseImage(&org);//不应该释放别人的资源
+	}
+	//cvSaveImage("sampleorg.jpg",m_sample);
 }
 Sample::~Sample()
 {
@@ -27,14 +32,14 @@ IplImage *Sample::getImage()
 	return m_sample;
 }
 
-void Sample::shrinkSample(int left, int right, int top, int bottom)
+int Sample::shrinkSample(int left, int right, int top, int bottom)
 {
    //update sample rect
 	CvRect shinkedRect = cvRect(left, top,
 										m_sampleBeforeShrink->width-left-right, m_sampleBeforeShrink->height-bottom-top);
 	//update other related parms
 	m_sample = g_CopyRectFromImg(m_sampleBeforeShrink, shinkedRect);
-
+	return left;
 }
 void Sample::setPatchNum(int num)
 {
@@ -71,7 +76,11 @@ void Sample::stepTmplate()
 	m_rectPatch.x += m_patchSize.width;
 	++m_iterTemplate;
 }
-
+int Sample::getLastPatch_x_cordinate()
+{
+	assert(m_totPatchNum!=0);
+	return  (m_totPatchNum-1)*m_patchSize.width;
+}
 //color the rect
 void Sample::markPatchRect()
 {
