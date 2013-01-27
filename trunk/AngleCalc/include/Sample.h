@@ -4,19 +4,20 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-#include "SampleWithBackGroud.h"
+#include "ImgeBase.h"
 
 
-class Sample
+class Sample:public ImageBase
 {
 
 public:
 	//friend class Mather;
-	Sample(SampleWithBackGroud  &swbg);
+	
+	Sample(IplImage *SampleSrc, CvRect rectInSrc);
 	~Sample();
 	//void getPrmFromMather(IplImage *mather);
 	//void loadSamplePic(IplImage *sample);
-	void shrinkSample(int shrinkTol_x, int shrinkTol_y);
+	void shrinkSample(int left, int right, int top, int bottom);
 	void setPatchNum(int num);
 
 	/*return:0 成功获取
@@ -26,6 +27,7 @@ public:
 	void markPatchRect();
 	void stepTmplate();
 	void showPic();
+	IplImage *getImage();
 	CvRect m_rectPatch;
 
 	

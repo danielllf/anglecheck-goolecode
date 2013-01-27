@@ -4,29 +4,34 @@
 //此类操作对象不应包含背景信息
 //sample中，采样图中的多个子矩形区域中的一个叫做：patch
 //sample中应该为从背景中取出的布匹（前景图）
-Sample::Sample(SampleWithBackGroud  &swbg)
+
+Sample::Sample(IplImage *SampleSrc, CvRect rectInSrc)
 {
 
 	m_patchImg=NULL;
 	m_iterTemplate = 0;
 	m_totPatchNum = 0;
-	m_sample = m_sampleBeforeShrink = g_CopyRectFromImg(swbg.InewSample, swbg.getBoundingRect());
-	
+	m_sample = m_sampleBeforeShrink = g_CopyRectFromImg(SampleSrc, rectInSrc);
+
 }
 Sample::~Sample()
 {
 	cvReleaseImageHeader(&m_patchImg);
+
 	cvReleaseImage(&m_sample);
 	cvReleaseImage(&m_sampleBeforeShrink);
 }
 
+IplImage *Sample::getImage()
+{
+	return m_sample;
+}
 
-
-void Sample::shrinkSample(int shrinkTol_x, int shrinkTol_y)
+void Sample::shrinkSample(int left, int right, int top, int bottom)
 {
    //update sample rect
-	CvRect shinkedRect = cvRect(shrinkTol_x, shrinkTol_y,
-										m_sampleBeforeShrink->width-2*shrinkTol_x, m_sampleBeforeShrink->height-2*shrinkTol_y);
+	CvRect shinkedRect = cvRect(left, top,
+										m_sampleBeforeShrink->width-left-right, m_sampleBeforeShrink->height-bottom-top);
 	//update other related parms
 	m_sample = g_CopyRectFromImg(m_sampleBeforeShrink, shinkedRect);
 
@@ -50,7 +55,7 @@ int Sample::getPatchImg(IplImage ** temp)
 		*temp = g_CopyRectFromImg(m_sample,m_rectPatch);
 		printf("sample patch rect:(%d,%d,%d,%d)\t",m_rectPatch.x,m_rectPatch.y,m_rectPatch.width, m_rectPatch.height);
 
-		++m_iterTemplate;
+		//++m_iterTemplate;
 		
 		return 0;	
 	}
@@ -64,6 +69,7 @@ void Sample::stepTmplate()
 {
 	//right move rect 
 	m_rectPatch.x += m_patchSize.width;
+	++m_iterTemplate;
 }
 
 //color the rect
@@ -71,9 +77,13 @@ void Sample::markPatchRect()
 {
 	cvSetImageROI(m_sample,m_rectPatch);
 	if(m_iterTemplate%2==0)
-		cvAddS(m_sample,cvScalar(100),m_sample);
+	{
+		cvAddS(m_sample,cvScalar(ADD_VALUE),m_sample);
+	}
 	else
-		cvAddS(m_sample,cvScalar(-100),m_sample);
+	{
+		cvAddS(m_sample,cvScalar(-ADD_VALUE),m_sample);
+	}
 	cvResetImageROI(m_sample);
 }
 

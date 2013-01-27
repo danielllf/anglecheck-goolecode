@@ -7,8 +7,8 @@
 Mather::Mather(IplImage *src)
 {
 		initParms();
-		m_src = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
-		cvCopy(src,m_src);
+		m_mather = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
+		cvCopy(src,m_mather);
 
 		m_cpsrc = cvCreateImage(cvSize(src->width,src->height),src->depth, src->nChannels);
 		cvCopy(src,m_cpsrc);
@@ -21,7 +21,11 @@ Mather::Mather(IplImage *src)
 }
 Mather::~Mather()
 {
-		cvReleaseImage(&m_src);
+		cvReleaseImage(&m_mather);
+}
+IplImage *Mather::getImage()
+{
+	return m_mather;
 }
 void Mather::setTmplateNum(int num)
 {
@@ -29,14 +33,16 @@ void Mather::setTmplateNum(int num)
 }
 int Mather::findMinCycle(int stripHeight,int startLine)
 {
-	IplImage *stripImg = cvCreateImageHeader(cvSize(m_src->width,stripHeight),m_src->depth,m_src->nChannels);
-	stripImg->imageData = m_src->imageData+m_src->widthStep*startLine;
-	stripImg->origin = m_src->origin;
-	stripImg->widthStep = m_src->widthStep;
-
-	fetchSamplePatchImg(stripImg);//get patch from sample
+	
+	IplImage *stripImg = cvCreateImageHeader(cvSize(m_mather->width,stripHeight),m_mather->depth,m_mather->nChannels);
+	stripImg->imageData = m_mather->imageData+m_mather->widthStep*startLine;
+	stripImg->origin = m_mather->origin;
+	stripImg->widthStep = m_mather->widthStep;
+	
+	//copy data to m_samplePatchCopy
+	fetchSamplePatchImg(stripImg);//get patch from sample,for this function, only has one patch
 	cvReleaseImageHeader(&stripImg);
-	CvRect stripRect = cvRect(0,startLine,m_src->width,stripHeight);
+	CvRect stripRect = cvRect(0,startLine,m_mather->width,stripHeight);
 	CvPoint pt = findMatchPointToGetCycle(stripRect,1,CV_TM_CCOEFF);
 	int cycleHeight = pt.y - startLine;
 
@@ -87,7 +93,7 @@ void Mather::setMaxAngle(int angle)
 {
 	assert(angle<20);//不使用大于20度的角
 	m_maxAngle = angle;
-	m_deltWidth = (m_src->height)*sin(m_maxAngle*CV_PI/180);
+	m_deltWidth = (m_mather->height)*sin(m_maxAngle*CV_PI/180);
 
 }
 CvRect Mather::getSamplePatchContainer(int sampleRect_x_cordinate)
@@ -111,12 +117,12 @@ CvRect Mather::getSamplePatchContainer(int sampleRect_x_cordinate)
 		leftEge = 0;
 	}
 	//right
-	if((rightEge=m_samplePatchSize.width+sampleRect_x_cordinate+m_deltWidth)>= m_src->width){
-			rightEge=m_src->width;
+	if((rightEge=m_samplePatchSize.width+sampleRect_x_cordinate+m_deltWidth)>= m_mather->width){
+			rightEge=m_mather->width;
 	}
 	//bottom
-	if((bottomEge = m_sampleHdrMatchLine+m_samplePatchSize.height+m_deltHeight)>=m_src->height){
-		bottomEge = m_src->height;
+	if((bottomEge = m_sampleHdrMatchLine+m_samplePatchSize.height+m_deltHeight)>=m_mather->height){
+		bottomEge = m_mather->height;
 	}
 
 	m_matherRect =cvRect(leftEge, upEge, rightEge-leftEge,bottomEge-upEge);
@@ -129,9 +135,9 @@ CvPoint Mather::findMatchPointInCycle(CvRect stripHdrRect, int  deltWidth, int n
 	
 	assert(m_minCycle!=0&&m_minCycle>stripHdrRect.height);
 	int hdrRectHeight = stripHdrRect.x+m_minCycle;
-	if(hdrRectHeight>m_src->height)hdrRectHeight = m_src->height;
+	if(hdrRectHeight>m_mather->height)hdrRectHeight = m_mather->height;
 	m_matherRect = cvRect(stripHdrRect.x, stripHdrRect.y,stripHdrRect.width+deltWidth, hdrRectHeight);
-	IplImage *subSrc = getSubTmplateImg(m_src,m_matherRect);
+	IplImage *subSrc = getSubTmplateImg(m_mather,m_matherRect);
 
 	IplImage *ftmp[6]={NULL};
 	int method=0;
@@ -266,8 +272,8 @@ CvPoint Mather::findMatchPointInCycle(CvRect stripHdrRect, int  deltWidth, int n
 CvPoint Mather::findMatchPointToGetCycle(CvRect stripRect, int nMethods, int priorityMethod, bool useNormed)
 {
 	//CalcMatherRect(sampleRect);
-	m_matherRect = cvRect(stripRect.x, stripRect.y+stripRect.height,stripRect.width, m_src->height-stripRect.height-stripRect.y);
-	IplImage *subSrc = getSubTmplateImg(m_src,m_matherRect);
+	m_matherRect = cvRect(stripRect.x, stripRect.y+stripRect.height,stripRect.width, m_mather->height-stripRect.height-stripRect.y);
+	IplImage *subSrc = getSubTmplateImg(m_mather,m_matherRect);
 
 	IplImage *ftmp[6]={NULL};
 	int method=0;
@@ -401,7 +407,7 @@ CvPoint Mather::findMatchPointToGetCycle(CvRect stripRect, int nMethods, int pri
 CvPoint Mather::findMatchPoint(int sampleRect_x_cordinate, int nMethods, int priorityMethod, bool useNormed)
 {
 	
-	IplImage *subSrc = getSubTmplateImg(m_src,getSamplePatchContainer( sampleRect_x_cordinate));
+	IplImage *subSrc = getSubTmplateImg(m_mather,getSamplePatchContainer( sampleRect_x_cordinate));
 
 	IplImage *ftmp[6]={NULL};
 	int method=0;
@@ -541,9 +547,9 @@ void Mather::markTemplateRect()
 {
 	cvSetImageROI(m_cpsrc,m_matherRect);
 	if(m_iterTemplate%2==0)
-		cvAddS(m_cpsrc,cvScalar(100),m_cpsrc);
+		cvAddS(m_cpsrc,cvScalar(ADD_VALUE),m_cpsrc);
 	else
-		cvAddS(m_cpsrc,cvScalar(-100),m_cpsrc);
+		cvAddS(m_cpsrc,cvScalar(-ADD_VALUE),m_cpsrc);
 	cvResetImageROI(m_cpsrc);
 }
 void Mather::showPic()
@@ -553,8 +559,7 @@ void Mather::showPic()
 }
 void Mather::mkLineColor(int starLine, int lineWight,int lineColor)
 {
-	cvSetImageROI(m_cpsrc,cvRect(0,starLine,m_src->width,lineWight));
-	//cvAddS(m_cpsrc,cvScalar(100),m_cpsrc);
+	cvSetImageROI(m_cpsrc,cvRect(0,starLine,m_mather->width,lineWight));
 	cvSet(m_cpsrc,cvScalar(lineColor));
 	cvResetImageROI(m_cpsrc);
 }

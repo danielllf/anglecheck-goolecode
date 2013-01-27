@@ -6,55 +6,15 @@
  int trace_level = 0;//用于trace函数等级控制
 static int color_line_tolerance =1;
 static int line_color = BLACK;
+static FILE* g_logfile=NULL; 
 
+void initParms()
+{ 
+	g_logfile = fopen("log.txt","w");
+	parse_configfile("../cvtest/calangle.conf");
 
-
-void PrintMat(CvMat* A)
-{
-	int i,j;
-	//printf("\nMatrix = :");
-	for(i=0;i<A->rows;i++)
-	{
-		printf("\n");
-
-		switch( CV_MAT_DEPTH(A->type) )
-		{
-		case CV_32F:
-		case CV_64F:
-			for(j=0;j<A->cols;j++)
-				printf("%9.3f ", (float) cvGetReal2D( A, i, j ));
-			break;
-		case CV_8U:
-		case CV_16U:
-			for(j=0;j<A->cols;j++)
-				printf("%6d",(int)cvGetReal2D( A, i, j ));
-			break;
-		default:
-			break;
-		}
-	}
-	printf("\n");
 }
 
-//只用于cv_8u1单通道
-void PrintMat2(Mat* m)
-{
-	assert(m->channels() == 1 );
-	int width = m->size().width;
-	int height = m->size().height;
-
-	for(int i = 0;i<height;i++)
-	{
-		uchar *pdata = m->data + i*m->step;
-		for (int j = 0;j<width;j++)
-		{
-			printf("%2d",(pdata[j]));
-		}
-		printf("=>%d\n",i);
-	}
-}
-
-//
 void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int color)
 {
 	assert(m->channels()==1);
@@ -184,38 +144,6 @@ int parse_configfile(const char* filename)
 			}
 			trace_level = val;
 		}
-		else if (!strcmp(cmd, "JitterTolerance")) 
-		{
-			get_arg(arg, sizeof(arg), &p);
-			val = atoi(arg);
-			if (val<0) {
-				llf_error("Invalid JitterTolerance: %s\n", arg);
-				return -1;
-			}
-			jitter_tolerance = val;
-		}
-		else if(!strcmp(cmd,"SlideTolerance"))
-		{
-				get_arg(arg, sizeof(arg), &p);
-				val = atoi(arg);
-				if (val<0)
-				{
-					llf_error("Invalid SlideTolerance:%s\n",arg);
-					return -1;
-				}
-				slide_tolerance = val;
-		}
-		else if(!strcmp(cmd,"StartLineType"))
-		{
-			get_arg(arg, sizeof(arg), &p);
-			val = atoi(arg);
-			if (val<0||val>1)
-			{
-				llf_error("Invalid StartLineType:%s\n",arg);
-				return -1;
-			}
-			start_line_type = val;
-		}
 		else if(!strcmp(cmd,"ColorLineTol"))
 		{
 			get_arg(arg, sizeof(arg), &p);
@@ -289,4 +217,17 @@ IplImage * g_CopyRectFromImg( IplImage *src, CvRect rect)
 	cvCopy(subROI,subSrc);
 	cvReleaseImageHeader(&subROI);
 	return subSrc;
+}
+
+void debug_showImgRect(IplImage *showImgSrc, CvRect rect)
+{
+	IplImage *imgToShow = cvCreateImage(cvGetSize(showImgSrc),showImgSrc->depth, showImgSrc->nChannels);
+	cvCopy(showImgSrc, imgToShow);
+	
+	cvSetImageROI(imgToShow, rect);
+	cvAddS(imgToShow,cvScalar(ADD_VALUE),imgToShow);
+	cvResetImageROI(imgToShow);
+	IMG_SHOW("临时调试图像",imgToShow);
+	cvWaitKey();
+	cvReleaseImage(&imgToShow);
 }

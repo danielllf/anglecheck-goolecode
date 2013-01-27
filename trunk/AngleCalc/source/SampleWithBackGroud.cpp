@@ -71,10 +71,14 @@ CvRect SampleWithBackGroud::getBoundingRect()
 void SampleWithBackGroud::showImg()
 { 
 	cvSetImageROI(InewSample,m_boundingRect);
-	cvAddS(InewSample,cvScalar(60),InewSample);
+	cvAddS(InewSample,cvScalar(ADD_VALUE),InewSample);
 	cvResetImageROI(InewSample);
 	IMG_SHOW(IavgBack,IavgBack);
 	IMG_SHOW(InewSample,InewSample);
 	//IMG_SHOW(Imask,Imask);
 
+}
+IplImage *SampleWithBackGroud::getImage()
+{
+	return InewSample;
 }
