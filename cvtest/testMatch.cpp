@@ -17,7 +17,7 @@ int main()
 	return 0;
 }
 #endif
-#if 1
+#if 0
 int main( int argc, char** argv ) {
 
 	IplImage *src,*ftmp[6], *srcImg; //ftmp is what to display on
@@ -27,28 +27,31 @@ int main( int argc, char** argv ) {
 	int priorityMethod = CV_TM_CCOEFF;//CV_TM_SQDIFF,CV_TM_CCORR,CV_TM_CCOEFF,
 	bool useNormaled = true;
 	int priorityMethod_getCycle=CV_TM_CCOEFF;
-	int assumedMinCycle = 50;//针对小循环可设小些，如5，大循环应该设大些，如50
-	int stripHeightTofindCycle = 60;//条越宽，其与周围像素的关联性越大，其唯一性增强。
-	float imgeScale = 0.5;
-	//g_getPresample("../cvtest/4newsample5.jpg",60,100,"4back5.jpg");return 0;
+	int assumedMinCycle = 5;//针对小循环可设小些，如5，大循环应该设大些，如50
+	int stripHeightTofindCycle = 100;//条越宽，其与周围像素的关联性越大，其唯一性增强。
+	float imgeScale = 2.0;
+	int widthDiv=2;
+	int deltWidthShift=10;
+	int startlineforMinCycle = 20;
+	//g_getPresample("../cvtest/8newsample.jpg",60,100,"8back.jpg");return 0;
 	
 	//get the sample rect from the background diff
-	if ((back = cvLoadImage("../cvtest/3back.jpg",0))==NULL)printf("load src erro\n");
-	if ((newsample = cvLoadImage("../cvtest/3newsample.jpg",0))==NULL)printf("load src erro\n");
+	if ((back = cvLoadImage("../cvtest/8back.jpg",0))==NULL)printf("load src erro\n");
+	if ((newsample = cvLoadImage("../cvtest/8newsample.jpg",0))==NULL)printf("load src erro\n");
 	SampleWithBackGroud avg(back,newsample,3);
 	avg.backgroundDiffllf();
 	CvRect  boundRect = avg.calcBoundingRect();
 	printf("forground rect(%d,%d,%d,%d)\n",boundRect.x,boundRect.y, boundRect.width, boundRect.height);
 
 	//load the mather
-	if ((src = cvLoadImage("../cvtest/3mather.jpg",0))==NULL)printf("load src erro\n");
+	if ((src = cvLoadImage("../cvtest/8mather.jpg",0))==NULL)printf("load src erro\n");
 
 	Mather *mather = new Mather(g_resizeImage(src,imgeScale));
 	cvReleaseImage(&src);
 
 
-	mather->setMaxAngle(5);
-	int cycle_height = mather->findMinCycle(stripHeightTofindCycle,0,assumedMinCycle,priorityMethod_getCycle,useNormaled);
+	mather->setMaxAngle(2);
+	int cycle_height = mather->findMinCycle(stripHeightTofindCycle,startlineforMinCycle,assumedMinCycle,priorityMethod_getCycle,useNormaled);
 	printf("cycle height:%d\n",cycle_height);
 	//getchar();
 #if 1
@@ -63,10 +66,10 @@ int main( int argc, char** argv ) {
 
 
 	mather->catchSample(&sample);
-	mather->getSampleShinked(5,5,5,50);
-	 mather->setTmplateNum(10);
+	mather->getSampleShinked(0,0,0,0);
+	 mather->setTmplateNum(5);
 
-	int hdrPos = mather->findSampleHdrPos(3,25,methodCount,priorityMethod,useNormaled);
+	int hdrPos = mather->findSampleHdrPos(widthDiv,deltWidthShift,methodCount,priorityMethod,useNormaled);
 	printf("hdrpos:%d\n",hdrPos);
 
 

@@ -1,6 +1,9 @@
 #ifndef _UTILITY_H
 #define _UTILITY_H
 #include <cv.h>
+#include <cxcore.h>
+#include <opencv.hpp>
+#include <highgui.h>
 #include "global.h"
 using namespace cv;
 
@@ -9,7 +12,7 @@ using namespace cv;
 #define LLF_PRINTF  
 
 extern FILE* g_logfile;
- 
+extern struct PenParam penParam;
 
 #ifdef LLF_PRINTF  
 #define llf_printf(format,...) fprintf(g_logfile,"Func:"__FUNCTION__", Line: %04d=> "format, __LINE__, ##__VA_ARGS__) ;\
