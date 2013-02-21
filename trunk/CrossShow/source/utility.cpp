@@ -1,19 +1,15 @@
 #include <stdio.h>
 
-#include "global.h"
-#include "utility.h"
+#include "../include/global.h"
+#include "../include/utility.h"
+
 
  int trace_level = 0;//用于trace函数等级控制
 static int color_line_tolerance =1;
 static int line_color = BLACK;
 static FILE* g_logfile=NULL; 
 
-void initParms()
-{ 
-	g_logfile = fopen("log.txt","w");
-	parse_configfile("../cvtest/calangle.conf");
 
-}
 
 void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int color)
 {
@@ -173,7 +169,12 @@ int parse_configfile(const char* filename)
 	fclose(f);
 	return 0;
 }
+void initParms()
+{ 
+	g_logfile = fopen("log.txt","w");
+	parse_configfile("../cvtest/calangle.conf");
 
+}
 void formatImg(IplImage* img,int pitch, int line_thick)
 {
 	using namespace cv;
@@ -256,4 +257,25 @@ IplImage* g_resizeImage(IplImage* src,float scale)
 	cvResize(src, dst, CV_INTER_LINEAR);	//缩放源图像到目标图像
 	return dst;
 	//cvReleaseImage(&dst);
+}
+//需手释
+IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitch)
+{
+	IplImage *blackimg = cvCreateImage(size,8,1);
+	cvSet(blackimg,cvScalar(0));
+	for (int i=0;i<blackimg->height;++i)
+	{
+		char* pdata = blackimg->imageData+i*blackimg->widthStep;
+		for(int j=0;j<blackimg->width;++j)
+		{
+			if(j%pitch==0&&i%pitch==0)
+			{
+				cvSetImageROI(blackimg,cvRect(j,i,spotSideLen,spotSideLen));
+				cvAddS(blackimg,cvScalar(255),blackimg);
+				cvResetImageROI(blackimg);
+			}
+		}
+	}
+	return blackimg;
+
 }

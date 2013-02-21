@@ -1,13 +1,13 @@
 #include "cv.h"
 #include "highgui.h"
-#include "utility.h"
-#if 1
+#include "../include/utility.h"
+#if 0
 int main(int argc, char ** argv)
 {
 	int thresholdBW = 30;
 	cvNamedWindow("image");
-	IplImage * src = cvLoadImage("../cvtest/shizix.jpg", 0);
-
+	IplImage * src = cvLoadImage("../test/shizix.jpg", 0);
+	if(src==NULL){printf("load file erro\n");return -1;}
 	IplImage * temp = cvCreateImage(cvGetSize(src), 8,1);
 	IplImage * img=cvCreateImage(cvGetSize(src), 8, 1);
 	cvCopyImage(src,temp);
@@ -47,3 +47,13 @@ int main(int argc, char ** argv)
 	return 0;
 }
 #endif
+
+int main()
+{
+	
+	IplImage* img=g_CreateCrossImage(cvSize(640,480),3,20);
+	//cvSaveImage("manualed_cross_show.jpg",img);
+	IMG_SHOW("IMG",img);
+	cvWaitKey();
+	return 0;
+}
