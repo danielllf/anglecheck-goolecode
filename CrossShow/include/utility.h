@@ -108,4 +108,9 @@ void g_getPresample(const char* filename,int startline,int height, const char* r
 
 //缩放图像
 IplImage* g_resizeImage(IplImage* src,float scale);
+
+//需手动释放内存
+IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitch);
+
+
 #endif
