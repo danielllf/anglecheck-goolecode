@@ -4,6 +4,7 @@
 #define _GLOBAL_H
 
 #include "utility.h"
+#include "LineImage.h"
 
 #define  ADD_VALUE 60
 
