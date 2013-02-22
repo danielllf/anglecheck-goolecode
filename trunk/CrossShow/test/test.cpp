@@ -1,6 +1,7 @@
 #include "cv.h"
 #include "highgui.h"
-#include "../include/utility.h"
+#include "global.h"
+
 #if 0
 int main(int argc, char ** argv)
 {
@@ -52,8 +53,11 @@ int main()
 {
 	
 	IplImage* img=g_CreateCrossImage(cvSize(640,480),3,20);
+	LineImage lineimg(cvGetSize(img));
+	lineimg.resetImagePitch(20);
 	//cvSaveImage("manualed_cross_show.jpg",img);
 	IMG_SHOW("IMG",img);
+	IMG_SHOW("lineed",lineimg.m_pImage);
 	cvWaitKey();
 	return 0;
 }
