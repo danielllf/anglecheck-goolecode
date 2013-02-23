@@ -4,5 +4,5 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-
+int getLinePitch(IplImage &src);
 #endif

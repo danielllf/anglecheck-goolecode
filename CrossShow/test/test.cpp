@@ -1,7 +1,8 @@
 #include "cv.h"
 #include "highgui.h"
-#include "global.h"
-
+#include "headers.h"
+#include "utility.h"
+#include <list>
 #if 0
 int main(int argc, char ** argv)
 {
@@ -48,16 +49,45 @@ int main(int argc, char ** argv)
 	return 0;
 }
 #endif
+typedef struct rrect{
+	int x;
+	int y;
+	int width;
+	int height;
+}rrect;
+void print_rect(void *pdata){
+	printf("%d,",((int*)((rrect*)pdata)->x));
+	printf("%d,",((int*)((rrect*)pdata)->y));
+
+	printf("%d,",((int*)((rrect*)pdata)->width));
+
+	printf("%d\n",((int*)((rrect*)pdata)->height));
+
+}
 
 int main()
 {
 	
 	IplImage* img=g_CreateCrossImage(cvSize(640,480),3,20);
 	LineImage lineimg(cvGetSize(img));
-	lineimg.resetImagePitch(20);
-	//cvSaveImage("manualed_cross_show.jpg",img);
-	IMG_SHOW("IMG",img);
+	lineimg.resetImageLine(cvPoint(0,50),90);
+	/*cvSaveImage("manualed_cross_show.jpg",img);
+	IMG_SHOW("IMG",img);*/
 	IMG_SHOW("lineed",lineimg.m_pImage);
 	cvWaitKey();
+
+	IplImage* src;
+	if( (src=cvLoadImage("manualed_cross_show.jpg",0))==NULL)
+	{
+		printf("load img erro\n");
+		return -1;
+	}
+	 getLinePitch(*src);
+
+	
+	
+
+
+getchar();
 	return 0;
 }

@@ -4,40 +4,17 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-#include "global.h"
+
+
 using namespace cv;
 
 
-/*****************以下为DEFINE********************************/
-#define LLF_PRINTF  
-
-extern FILE* g_logfile;
-extern struct PenParam penParam;
-
-#ifdef LLF_PRINTF  
-#define llf_printf(format,...) fprintf(g_logfile,"Func:"__FUNCTION__", Line: %04d=> "format, __LINE__, ##__VA_ARGS__) ;\
-			fflush(g_logfile);
-#else  
-#define llf_printf(format,...)  
-#endif 
 
 /*****************以下为变量声明********************************/
 
 extern int trace_level;
 extern int line_color;
 extern int color_line_tolerance;
-
-
-/*****************以下为结构体定义********************************/
-
-enum{
-	WHITE = 255,
-	BLACK = 0
-};
-
-
-
-
 
 
 /*****************以下为函数声明********************************/
