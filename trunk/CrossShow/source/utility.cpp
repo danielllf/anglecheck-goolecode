@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "../include/global.h"
+#include "../include/global_def.h"
 #include "../include/utility.h"
 
 
@@ -8,8 +8,8 @@
 static int color_line_tolerance =1;
 static int line_color = BLACK;
 static FILE* g_logfile=NULL; 
-
-
+extern FILE* g_logfile;
+extern int WHITE_PART;
 
 void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int color)
 {
@@ -227,7 +227,7 @@ void g_showImgRect(IplImage *showImgSrc, CvRect rect)
 	cvCopy(showImgSrc, imgToShow);
 	
 	cvSetImageROI(imgToShow, rect);
-	cvAddS(imgToShow,cvScalar(ADD_VALUE),imgToShow);
+	cvAddS(imgToShow,cvScalar(60),imgToShow);
 	cvResetImageROI(imgToShow);
 	IMG_SHOW("临时调试图像",imgToShow);
 	cvWaitKey();
@@ -271,7 +271,7 @@ IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitc
 			if(j%pitch==0&&i%pitch==0)
 			{
 				cvSetImageROI(blackimg,cvRect(j,i,spotSideLen,spotSideLen));
-				cvAddS(blackimg,cvScalar(255),blackimg);
+				cvAddS(blackimg,cvScalar(WHITE_PART),blackimg);
 				cvResetImageROI(blackimg);
 			}
 		}
