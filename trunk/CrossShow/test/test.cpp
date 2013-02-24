@@ -49,42 +49,34 @@ int main(int argc, char ** argv)
 	return 0;
 }
 #endif
-typedef struct rrect{
-	int x;
-	int y;
-	int width;
-	int height;
-}rrect;
-void print_rect(void *pdata){
-	printf("%d,",((int*)((rrect*)pdata)->x));
-	printf("%d,",((int*)((rrect*)pdata)->y));
-
-	printf("%d,",((int*)((rrect*)pdata)->width));
-
-	printf("%d\n",((int*)((rrect*)pdata)->height));
-
-}
 
 int main()
 {
 	
-	IplImage* img=g_CreateCrossImage(cvSize(640,480),3,20);
-	LineImage lineimg(cvGetSize(img));
-	lineimg.resetImageLine(cvPoint(0,50),90);
-	/*cvSaveImage("manualed_cross_show.jpg",img);
-	IMG_SHOW("IMG",img);*/
-	IMG_SHOW("lineed",lineimg.m_pImage);
-	cvWaitKey();
+	//IplImage* img=g_CreateCrossImage(cvSize(640,480),3,20);
+	//LineImage lineimg(cvGetSize(img));
+	//lineimg.resetImageLine(cvPoint(0,50),90);
+	///*cvSaveImage("manualed_cross_show.jpg",img);
+	//IMG_SHOW("IMG",img);*/
+	//IMG_SHOW("lineed",lineimg.m_pImage);
+	//cvWaitKey();
 
-	IplImage* src;
-	if( (src=cvLoadImage("manualed_cross_show.jpg",0))==NULL)
-	{
-		printf("load img erro\n");
-		return -1;
-	}
-	 getLinePitch(*src);
+	//IplImage* src;
+	//if( (src=cvLoadImage("manualed_cross_show.jpg",0))==NULL)
+	//{
+	//	printf("load img erro\n");
+	//	return -1;
+	//}
+	// getLinePitch(*src);
 
+	CalcObj cal;
+	cal.addone(1,20);
+	cal.addone(2,30);
+	cal.addone(3,20);
+	cal.addone(4,20);
 	
+	cal.removeWhereSumis(20);
+	int size = cal.listSize();
 	
 
 
