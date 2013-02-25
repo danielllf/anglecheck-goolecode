@@ -5,4 +5,8 @@
 #include <opencv.hpp>
 #include <highgui.h>
 int getLinePitch(IplImage &src);
+
+
+int getSumOfLineMask(IplImage* src,IplImage* lineImg);
+
 #endif

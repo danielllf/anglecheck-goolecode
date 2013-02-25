@@ -17,7 +17,7 @@ IplImage* LineImage::getImage()
 int LineImage::resetImageLine(CvPoint startPt,int lineLen)
 {
 		cvSet(m_pImage,cvScalar(0));
-		cvLine(m_pImage,startPt,cvPoint(lineLen,startPt.y),cvScalar(WHITE_PART));
+		cvLine(m_pImage,startPt,cvPoint(lineLen-1,startPt.y),cvScalar(WHITE_PART));
 	
 	return 0;
 }
@@ -31,11 +31,11 @@ CalcObj::~CalcObj()
 {
 
 }
-void CalcObj::addone(int linenum,int sum)
+void CalcObj::addone(int linenum,int value)
 {
 	LINEIFO info;
 	info.lineNum = linenum;
-	info.sum = sum;
+	info.value = value;
 	m_list.push_back(info);
 
 }
@@ -45,27 +45,37 @@ LINEIFO CalcObj::getTheMaxElement()
 	std::list<LINEIFO>:: iterator  it=m_list.begin();
 	 LINEIFO maxSum;
 	
-	maxSum.sum = it->sum;
+	maxSum.value = it->value;
 	 for (it;it!=m_list.end();++it)
 	 {
-		 if (it->sum>maxSum.sum)
+		 if (it->value>maxSum.value)
 		 {
-			 maxSum.sum = it->sum;
+			 maxSum.value = it->value;
 			 maxSum.lineNum = it->lineNum;
 		 }
 	 }
 	 return maxSum;
 }	
+int CalcObj::getTheAvgElementValue()
+{
+	std::list<LINEIFO>:: iterator  it=m_list.begin();
+	int sum=0;
+	for (it;it!=m_list.end();++it)
+	{
+		sum+=it->value;
+	}
+	return sum/(int)m_list.size();
+}
 void CalcObj::clearAll()
 {
 	m_list.clear();
 }
 
-void CalcObj::removeWhereSumis(const int& value)
+void CalcObj::removeWhereValueis(const int& value)
 {
 	m_list.remove_if( isElementSumEqual(value));
 }
 int CalcObj::listSize()
 {
-	return m_list.size();
+	return (int)m_list.size();
 }

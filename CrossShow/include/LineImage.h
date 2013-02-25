@@ -26,7 +26,7 @@ public:
 
 struct LINEIFO{
 	int lineNum;
-	int sum;
+	int value;
 };
 
 
@@ -34,11 +34,12 @@ class CalcObj{
 public:
 	CalcObj();
 	~CalcObj();
-	void addone(int linenum,int sum);
+	void addone(int linenum,int value);
 	LINEIFO getTheMaxElement();
+	int getTheAvgElementValue();
 	void clearAll();
 	int listSize();
-	void removeWhereSumis(const int& value);
+	void removeWhereValueis(const int& value);
 private:
 
 	std::list<LINEIFO> m_list;
@@ -48,7 +49,7 @@ private:
 		isElementSumEqual(const int& outerParam):m_outParam(outerParam){}
 		bool operator ()(LINEIFO inerParam)
 		{
-			if (inerParam.sum==m_outParam)//所要满足的条件
+			if (inerParam.value==m_outParam)//所要满足的条件
 			{
 				return true;
 			}
