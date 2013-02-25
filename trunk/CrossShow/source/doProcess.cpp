@@ -49,24 +49,27 @@ int getLinePitch(IplImage &src)
 
 		if(sumAtlinePos==sumLineimg)
 		{
-			current_linePos = OnValley;
-			if (pre_linePos==OnMoutain)
+			if (pre_linePos==OnMoutain)//OnMoutain-->>OnValley
 			{
 				//end the calc for this small area
 				elementLineInfo=elem_calc.getTheMaxElement();
 				final_calc.addone(elementLineInfo.lineNum,elementLineInfo.value);
+
 			}
+			current_linePos = OnValley;
+			pre_linePos = current_linePos;
 			continue;
 		}
 		else
 		{
 			//calc small area sum,get the max
-			current_linePos = OnMoutain;
 			if (pre_linePos==OnValley)
-			{//clear for a new start
+			{	
+				//clear for a new start
 				elem_calc.clearAll();
 			}
 			elem_calc.addone(i,sumAtlinePos);
+			current_linePos = OnMoutain;
 		}
 		pre_linePos = current_linePos;
 	}

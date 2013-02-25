@@ -44,8 +44,9 @@ LINEIFO CalcObj::getTheMaxElement()
 {
 	std::list<LINEIFO>:: iterator  it=m_list.begin();
 	 LINEIFO maxSum;
-	
+	assert(m_list.size()>0);
 	maxSum.value = it->value;
+	maxSum.lineNum = it->lineNum;
 	 for (it;it!=m_list.end();++it)
 	 {
 		 if (it->value>maxSum.value)
