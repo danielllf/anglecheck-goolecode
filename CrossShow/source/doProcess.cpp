@@ -1,5 +1,6 @@
 #include "../include/doProcess.h"
 #include "../include/LineImage.h"
+#include "../include/CalcObj.h"
 unsigned char cmpLineLen=3;
 enum Pos_STATUS{
 	 OnValley=0,
@@ -23,8 +24,8 @@ int getLinePitch(IplImage &src)
 	int sumAtlinePos;
 	CvScalar sumSrc = cvSum(&src);
 	Pos_STATUS current_linePos,pre_linePos;
-	CalcObj elem_calc;
-	CalcObj final_calc;
+	CalcObjVector elem_calc;
+	CalcObjList final_calc;
     LINEIFO elementLineInfo;//很小区域内算出的SUM最大的一条线,是终极计算的element 
 	LINEIFO finalLineInfo;
 	int src_height = cvGetSize(&src).height;
@@ -74,7 +75,7 @@ int getLinePitch(IplImage &src)
 		pre_linePos = current_linePos;
 	}
     int avg=	final_calc.getTheAvgElementValue();
-
+	int purity = final_calc.PurifyTheData(1.0);
 	return -1;
 }
 

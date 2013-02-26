@@ -1,5 +1,5 @@
-#ifndef _UTILITY_H
-#define _UTILITY_H
+#ifndef LLF_UTILITY_H
+#define LLF_UTILITY_H
 #include <cv.h>
 #include <cxcore.h>
 #include <opencv.hpp>
@@ -89,5 +89,7 @@ IplImage* g_resizeImage(IplImage* src,float scale);
 //需手动释放内存
 IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitch);
 
+//独立的函数打印二维数组到指定文件
+void PrintMat(CvMat* A);
 
 #endif
