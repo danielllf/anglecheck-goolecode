@@ -1,6 +1,8 @@
 #include "../include/global_def.h"
 #include "../include/LineImage.h"
-int WHITE_PART=100;//黑白图片中白色值设置为小于255的一半，所以在两图相加后，仍小于255，不会益处。
+//为了让在图形处理时，数据尽量小，此值应尽量小。最好为1.只是此时眼睛不见，所以才大了些
+int WHITE_PART=10;//黑白图片中白色值设置为小于255，所以在两图相加后，仍小于255，不会益处。
+
 LineImage::LineImage(CvSize size)
 {
 	m_pImage = cvCreateImage(size,IPL_DEPTH_8U,1);
@@ -22,61 +24,3 @@ int LineImage::resetImageLine(CvPoint startPt,int lineLen)
 	return 0;
 }
 
-/****************CalcObj************************/
-CalcObj::CalcObj()
-{
-	
-}
-CalcObj::~CalcObj()
-{
-
-}
-void CalcObj::addone(int linenum,int value)
-{
-	LINEIFO info;
-	info.lineNum = linenum;
-	info.value = value;
-	m_list.push_back(info);
-
-}
-
-LINEIFO CalcObj::getTheMaxElement()
-{
-	std::list<LINEIFO>:: iterator  it=m_list.begin();
-	 LINEIFO maxSum;
-	assert(m_list.size()>0);
-	maxSum.value = it->value;
-	maxSum.lineNum = it->lineNum;
-	 for (it;it!=m_list.end();++it)
-	 {
-		 if (it->value>maxSum.value)
-		 {
-			 maxSum.value = it->value;
-			 maxSum.lineNum = it->lineNum;
-		 }
-	 }
-	 return maxSum;
-}	
-int CalcObj::getTheAvgElementValue()
-{
-	std::list<LINEIFO>:: iterator  it=m_list.begin();
-	int sum=0;
-	for (it;it!=m_list.end();++it)
-	{
-		sum+=it->value;
-	}
-	return sum/(int)m_list.size();
-}
-void CalcObj::clearAll()
-{
-	m_list.clear();
-}
-
-void CalcObj::removeWhereValueis(const int& value)
-{
-	m_list.remove_if( isElementSumEqual(value));
-}
-int CalcObj::listSize()
-{
-	return (int)m_list.size();
-}

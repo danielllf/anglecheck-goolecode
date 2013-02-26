@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "../include/global_def.h"
-#include "../include/utility.h"
+#include "../include/llfutility.h"
 
 
  int trace_level = 0;//用于trace函数等级控制
@@ -278,4 +278,33 @@ IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitc
 	}
 	return blackimg;
 
+}
+
+
+// 显示矩阵
+void PrintMat(CvMat* A)
+{
+	int i,j;
+	//printf("\nMatrix = :");
+	for(i=0;i<A->rows;i++)
+	{
+		printf("\n");
+
+		switch( CV_MAT_DEPTH(A->type) )
+		{
+		case CV_32F:
+		case CV_64F:
+			for(j=0;j<A->cols;j++)
+				printf("%19.13f ", (float) cvGetReal2D( A, i, j ));
+			break;
+		case CV_8U:
+		case CV_16U:
+			for(j=0;j<A->cols;j++)
+				printf("%6d",(int)cvGetReal2D( A, i, j ));
+			break;
+		default:
+			break;
+		}
+	}
+	printf("\n");
 }

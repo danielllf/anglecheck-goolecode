@@ -1,7 +1,7 @@
 #include "cv.h"
 #include "highgui.h"
 #include "headers.h"
-#include "utility.h"
+#include "llfutility.h"
 #include <list>
 #if 0
 int main(int argc, char ** argv)
@@ -69,17 +69,8 @@ int main()
 	}
 	 getLinePitch(*src);
 
-	/*CalcObj cal;
-	cal.addone(1,20);
-	cal.addone(2,30);
-	cal.addone(3,20);
-	cal.addone(4,20);
-	
-	cal.removeWhereValueis(30);
-	int size = cal.listSize();*/
-	
 
 
-getchar();
+//getchar();
 	return 0;
 }

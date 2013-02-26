@@ -3,5 +3,5 @@
 
 #include "LineImage.h"
 #include "doProcess.h"
-
+#include "CalcObj.h"
 #endif
