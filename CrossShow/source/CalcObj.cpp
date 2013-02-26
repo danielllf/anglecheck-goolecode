@@ -124,7 +124,6 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 	CvMat *mat=	cvCreateMat(1,cols,CV_16U);
 	std::list<LINEIFO>:: iterator  it;
 	int i;
-	int facor_below_remove=0.5;//小于均值一半的，删除它
 	float stainlity=1.0;//污染率
 
 	const float EPSINON = 0.0001;//float 与0值比较时注意不能直接比较
@@ -135,7 +134,7 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 		{
 			 *((unsigned int*)CV_MAT_ELEM_PTR(*mat,0,i)) = it->value;
 		}
-		PrintMat(mat);printf("\n+++++++++++\n");
+		//PrintMat(mat);printf("\n+++++++++++\n");
 		cvAvgSdv(mat,&s_mean,&s_sdv);
 		stainlity = s_sdv.val[0]/s_mean.val[0];
 
@@ -148,7 +147,7 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 			for (it=m_list.begin();it!=m_list.end();++it)
 			{
 				//remove element that below the mean*facor_below_remove
-				if (it->value<(int)(s_mean.val[0]*facor_below_remove))
+				if (it->value<(int)(s_mean.val[0]))
 				{
 					m_list.remove_if( isElementValueEqual(it->value));
 				}
