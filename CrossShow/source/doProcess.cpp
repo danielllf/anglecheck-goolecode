@@ -1,9 +1,10 @@
 #include "../include/doProcess.h"
 #include "../include/LineImage.h"
 #include "../include/CalcObj.h"
-unsigned char cmpLineLen=3;
+unsigned char cmpLineLen=200;
 float Purfactor = 0.9;
 int continuesLinecount = 4;//间距均匀的连续线的条数
+float continuesTol=0.5;//连续几条线被视为是连续且均匀时的sdv/mean
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -78,7 +79,7 @@ int getLinePitchProcess(IplImage &src)
 	}
 
 	int purity = final_calc.PurifyTheData(Purfactor);
-	int pitch=final_calc.getLinePitch(continuesLinecount);
+	int pitch=final_calc.getLinePitch(continuesLinecount,continuesTol);
 	return pitch;
 }
 
