@@ -6,6 +6,17 @@ CalcObjVector::CalcObjVector()
 {
 
 }
+CalcObjVector::CalcObjVector( std::list<LINEIFO> &srclist)
+{
+	std::list<LINEIFO>:: iterator  it=srclist.begin();
+	LINEIFO info;
+	for (it;it!=srclist.end();++it)
+	{
+		info.lineNum = it->lineNum;
+		info.value = it->value;
+		m_vect.push_back(info);
+	}
+}
 CalcObjVector::~CalcObjVector()
 {
 
@@ -55,6 +66,7 @@ int CalcObjVector::Size()
 {
 	return (int)m_vect.size();
 }
+
 
 
 /****************CalcObjList************************/
@@ -120,8 +132,7 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 	//convert list to mat for using cvAvgSdv
 	CvScalar s_mean;
 	CvScalar s_sdv;
-	int  cols = (int)m_list.size();
-	CvMat *mat=	cvCreateMat(1,cols,CV_16U);
+	CvMat *mat;
 	std::list<LINEIFO>:: iterator  it;
 	int i;
 	float stainlity=1.0;//污染率
@@ -130,6 +141,7 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 
 	while(1)
 	{
+		mat=	cvCreateMat(1,(int)m_list.size(),CV_16U);
 		for (it=m_list.begin(),i=0;it!=m_list.end();++it,++i)
 		{
 			 *((unsigned int*)CV_MAT_ELEM_PTR(*mat,0,i)) = it->value;
@@ -161,4 +173,55 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 	}
 	return 1-stainlity;
 }
+float CalcObjList::getLinedistanceSdvPercentToMean(int continuesLineCount,std::list<LINEIFO>:: iterator  it_start,CvScalar &mean)
+{
+	CvScalar s_mean;
+	CvScalar s_sdv;
+	int matElementCnt = continuesLineCount-1;
+	CvMat *mat=	cvCreateMat(1,matElementCnt,CV_16U);;
+ int preLinenum;
+	for (int i=0;i<matElementCnt;++i)
+	{
+		preLinenum = it_start->lineNum;
+		++it_start;
+		int linedistance = it_start->lineNum-preLinenum;
+		*((unsigned int*)CV_MAT_ELEM_PTR(*mat,0,i)) = linedistance;
+	}	
+	//PrintMat(mat);printf("\n+++++++++++\n");
+	cvAvgSdv(mat,&s_mean,&s_sdv);
+	mean = s_mean;
+	return (float)(s_sdv.val[0]/s_mean.val[0]);
 
+}
+int CalcObjList::getLinePitch(int continuesCount,float continuesTol)
+{
+	assert(continuesCount>=3);
+	std::list<LINEIFO>:: iterator  it;
+	int it_startOfthisTurn;
+	int listlen = (int)m_list.size();	
+	it=m_list.begin();
+	int i=0;
+	float percentsdvtomean;
+	const float EPSINON = 0.0001;//float 与0值比较时注意不能直接比较
+	CvScalar mean=cvScalar(0);
+
+	while(1)
+	{
+		if (listlen-i<continuesCount)
+		{
+			break;
+		}
+		percentsdvtomean=getLinedistanceSdvPercentToMean(continuesCount,it,mean);
+		if (percentsdvtomean>(continuesTol-EPSINON))
+		{
+			it++;
+			i++;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return (int)mean.val[0];
+
+}

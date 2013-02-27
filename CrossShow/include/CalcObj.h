@@ -25,9 +25,11 @@ public:
 	void removeWhereValueis(const int& value);
 	//返回纯化后数据的纯度（1-sdv/mean）
 	float PurifyTheData(float  Purfactor);
+	float getLinedistanceSdvPercentToMean(int continuesLineCount,std::list<LINEIFO>:: iterator  it_start,CvScalar &mean);
+	int getLinePitch(int continuesCount,float continuesTol=0.5);
+	std::list<LINEIFO> m_list;
 private:
 
-	std::list<LINEIFO> m_list;
 	class isElementValueEqual//remove_if的函数子(必须重载perator()).此类在remove_if中可以当作函数来调用
 	{//相当于自定义一个满足一定条件的回调函数给remove_if
 	public:
@@ -49,12 +51,14 @@ private:
 class CalcObjVector{
 public:
 	CalcObjVector();
+	CalcObjVector( std::list<LINEIFO> &srclist);
 	~CalcObjVector();
 	void addone(int linenum,int value);
 	LINEIFO getTheMaxElement();
 	int getTheAvgElementValue();
 	void clearAll();
 	int Size();
+
 private:
 	std::vector<LINEIFO> m_vect;
 };
