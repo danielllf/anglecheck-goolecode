@@ -67,7 +67,14 @@ int main()
 		printf("load img erro\n");
 		return -1;
 	}
-	 getLinePitch(*src);
+	//获取当前时间
+	SYSTEMTIME sys; 
+	GetLocalTime( &sys ); 
+	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+	int pitch= getLinePitchProcess(*src);
+	GetLocalTime(&sys);
+	printf( "mainEnd..%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
 
 
 

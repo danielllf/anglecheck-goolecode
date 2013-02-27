@@ -2,6 +2,8 @@
 #include "../include/LineImage.h"
 #include "../include/CalcObj.h"
 unsigned char cmpLineLen=3;
+float Purfactor = 0.9;
+int continuesLinecount = 4;//间距均匀的连续线的条数
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -17,7 +19,7 @@ int getSumOfLineMask(IplImage* src,IplImage* lineImg)
 	 cvReleaseImage(&rltimg);
 	return  sum;
 }
-int getLinePitch(IplImage &src)
+int getLinePitchProcess(IplImage &src)
 {
 	LineImage lineimgObj(cvGetSize(&src) );
 
@@ -74,8 +76,9 @@ int getLinePitch(IplImage &src)
 		}
 		pre_linePos = current_linePos;
 	}
-    int avg=	final_calc.getTheAvgElementValue();
-	int purity = final_calc.PurifyTheData(1.0);
-	return -1;
+
+	int purity = final_calc.PurifyTheData(Purfactor);
+	int pitch=final_calc.getLinePitch(continuesLinecount);
+	return pitch;
 }
 
