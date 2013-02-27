@@ -62,11 +62,12 @@ int main()
 	//cvWaitKey();
 
 	IplImage* src;
-	if( (src=cvLoadImage("manualed_cross_show.bmp",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
+	if( (src=cvLoadImage("dstnosmooElipseshizix4.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
 	{
 		printf("load img erro\n");
 		return -1;
 	}
+	cvThreshold( src,src,5.0, 10, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
 	//获取当前时间
 	SYSTEMTIME sys; 
 	GetLocalTime( &sys ); 
