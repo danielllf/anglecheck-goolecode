@@ -25,8 +25,9 @@ public:
 	void removeWhereValueis(const int& value);
 	//返回纯化后数据的纯度（1-sdv/mean）
 	float PurifyTheData(float  Purfactor);
-	float getLinedistanceSdvPercentToMean(int continuesLineCount,std::list<LINEIFO>:: iterator  it_start,CvScalar &mean);
-	int getLinePitch(int continuesCount,float continuesTol=0.5);
+	float getLinedistanceSdvPercentToMean(int continuesLineCount,const std::list<LINEIFO>:: iterator  it_start,CvScalar &mean
+																		,CvScalar &sdv,std::list<int> &rlt_list);
+	int getLinePitch(int continuesCount,float continuesTol,std::list<int> &rlt_list);
 	std::list<LINEIFO> m_list;
 private:
 
