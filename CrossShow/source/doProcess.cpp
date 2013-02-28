@@ -1,10 +1,12 @@
 #include "../include/doProcess.h"
 #include "../include/LineImage.h"
 #include "../include/CalcObj.h"
-unsigned char cmpLineLen=200;
+unsigned char cmpLineLen=500;
 float Purfactor = 0.9;
-int continuesLinecount = 4;//间距均匀的连续线的条数
-float continuesTol=0.5;//连续几条线被视为是连续且均匀时的sdv/mean
+int continuesLinecount = 6;//间距均匀的连续线的条数
+
+//此值如果未找到，则会以0.05向上递增，直到找到为止
+float continuesTol=0.05;//（设置时<=0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -19,6 +21,14 @@ int getSumOfLineMask(IplImage* src,IplImage* lineImg)
 	 int sum = (int)cvSum(rltimg).val[0];
 	 cvReleaseImage(&rltimg);
 	return  sum;
+}
+void setImgLine(IplImage* src,std::list<int> linelist)
+{
+	std::list<int>::iterator it=linelist.begin();
+	for (it;it!=linelist.end();++it)
+	{
+		cvLine(src,cvPoint(0,*it),cvPoint(src->width,*it),cvScalar(255));
+	}
 }
 int getLinePitchProcess(IplImage &src)
 {
@@ -79,7 +89,9 @@ int getLinePitchProcess(IplImage &src)
 	}
 
 	int purity = final_calc.PurifyTheData(Purfactor);
-	int pitch=final_calc.getLinePitch(continuesLinecount,continuesTol);
+	std::list<int> line_list;
+	int pitch=final_calc.getLinePitch(continuesLinecount,continuesTol,line_list);
+   setImgLine(&src,line_list);
 	return pitch;
 }
 

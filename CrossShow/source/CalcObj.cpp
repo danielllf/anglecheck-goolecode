@@ -173,54 +173,84 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 	}
 	return 1-stainlity;
 }
-float CalcObjList::getLinedistanceSdvPercentToMean(int continuesLineCount,std::list<LINEIFO>:: iterator  it_start,CvScalar &mean)
+float CalcObjList::getLinedistanceSdvPercentToMean(int continuesLineCount,const std::list<LINEIFO>:: iterator  it_start,CvScalar &mean,CvScalar &sdv,
+																					   std::list<int> &rlt_list)
 {
+	std::list<LINEIFO>:: iterator  it=it_start;
 	CvScalar s_mean;
 	CvScalar s_sdv;
 	int matElementCnt = continuesLineCount-1;
 	CvMat *mat=	cvCreateMat(1,matElementCnt,CV_16U);;
- int preLinenum;
+	int preLinenum;
+    rlt_list.clear();
 	for (int i=0;i<matElementCnt;++i)
 	{
-		preLinenum = it_start->lineNum;
-		++it_start;
-		int linedistance = it_start->lineNum-preLinenum;
+		preLinenum = it->lineNum;
+		rlt_list.push_back(preLinenum);
+		++it;
+		rlt_list.push_back(it->lineNum);
+		int linedistance = it->lineNum-preLinenum;
+
 		*((unsigned int*)CV_MAT_ELEM_PTR(*mat,0,i)) = linedistance;
+
 	}	
 	//PrintMat(mat);printf("\n+++++++++++\n");
 	cvAvgSdv(mat,&s_mean,&s_sdv);
 	mean = s_mean;
+	sdv = s_sdv;
 	return (float)(s_sdv.val[0]/s_mean.val[0]);
 
 }
-int CalcObjList::getLinePitch(int continuesCount,float continuesTol)
+int CalcObjList::getLinePitch(int continuesCount,float continuesTol,std::list<int> &rlt_list)
 {
 	assert(continuesCount>=3);
 	std::list<LINEIFO>:: iterator  it;
 	int it_startOfthisTurn;
-	int listlen = (int)m_list.size();	
-	it=m_list.begin();
-	int i=0;
 	float percentsdvtomean;
 	const float EPSINON = 0.0001;//float 与0值比较时注意不能直接比较
-	CvScalar mean=cvScalar(0);
-
-	while(1)
+	int listlen = (int)m_list.size();	
+	CvScalar mean;
+	CvScalar sdv;
+	bool findSUCCESS=false;//
+    while(1)
 	{
-		if (listlen-i<continuesCount)
+		if (findSUCCESS ==true)break;
+		//if false becaseof to the end of pic,the go on ,change continuesTol to find again
+		it=m_list.begin();
+		int i=0;
+		 mean=cvScalar(0);
+		 sdv=cvScalar(0);
+		 if(continuesTol<0.05)continuesTol=0.05;
+		else if(continuesTol<0.1&&continuesTol>=0.05)continuesTol=0.1;
+		 else if(continuesTol<0.15&&continuesTol>=0.1)continuesTol=0.15;
+		  else if(continuesTol<0.2&&continuesTol>=0.15)continuesTol=0.2;
+			else if(continuesTol<0.25&&continuesTol>=0.2)continuesTol=0.25;
+			 else if(continuesTol<0.3&&continuesTol>=0.25)continuesTol=0.3;
+			  else if(continuesTol<0.35&&continuesTol>=0.3)continuesTol=0.35;
+			   else if(continuesTol<0.4&&continuesTol>=0.35)continuesTol=0.4;
+			   else continuesTol=0.5;
+
+
+		while(1)
 		{
-			break;
+			if (listlen-i<continuesCount)//to the end of pic
+			{
+				findSUCCESS = false;
+				break;
+			}
+			percentsdvtomean=getLinedistanceSdvPercentToMean(continuesCount,it,mean,sdv,rlt_list);
+			if (percentsdvtomean>(continuesTol-EPSINON))
+			{
+				it++;
+				i++;
+			}
+			else
+			{
+				findSUCCESS = true;
+				break;
+			}
 		}
-		percentsdvtomean=getLinedistanceSdvPercentToMean(continuesCount,it,mean);
-		if (percentsdvtomean>(continuesTol-EPSINON))
-		{
-			it++;
-			i++;
-		}
-		else
-		{
-			break;
-		}
+
 	}
 	return (int)mean.val[0];
 
