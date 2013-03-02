@@ -1,4 +1,8 @@
 //有关统计算法的相关函数
+#include<cv.h>
+#include <cxcore.h>
+#include <opencv.hpp>
+#include <vector>
 
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
@@ -9,16 +13,14 @@ enum{
 	BLACK = 0
 };
 
+#define debug_ShowTime 
+//#define showLineGroup 
+#define  ShowLineSect 
+typedef std::vector<CvPoint> vectorPoint;
+typedef std::vector<int> vectorInt;
+/*****************以下为变量声明********************************/
 
-/*****************以下为DEFINE********************************/
-//#define LLF_PRINTF  
-//
-//#ifdef LLF_PRINTF  
-//#define llf_printf(format,...) fprintf(g_logfile,"Func:"__FUNCTION__", Line: %04d=> "format, __LINE__, ##__VA_ARGS__) ;\
-//	fflush(g_logfile);
-//#else  
-//#define llf_printf(format,...)  
-//#endif 
 
+extern int WHITE_PART;
 
 #endif

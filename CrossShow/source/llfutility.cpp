@@ -8,8 +8,7 @@
 static int color_line_tolerance =1;
 static int line_color = BLACK;
 static FILE* g_logfile=NULL; 
-extern FILE* g_logfile;
-extern int WHITE_PART;
+	SYSTEMTIME sys; 
 
 void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int color)
 {
@@ -250,8 +249,8 @@ IplImage* g_resizeImage(IplImage* src,float scale)
 	IplImage *dst = 0;			//目标图像指针
 	CvSize dst_cvsize;			//目标图像尺寸
 
-	dst_cvsize.width = src->width * scale;		//目标图像的宽为源图象宽的scale倍
-	dst_cvsize.height = src->height * scale;	//目标图像的高为源图象高的scale倍
+	dst_cvsize.width = (int)src->width * scale;		//目标图像的宽为源图象宽的scale倍
+	dst_cvsize.height = (int)src->height * scale;	//目标图像的高为源图象高的scale倍
 
 	dst = cvCreateImage( dst_cvsize, src->depth, src->nChannels);	//构造目标图象
 	cvResize(src, dst, CV_INTER_LINEAR);	//缩放源图像到目标图像
@@ -308,3 +307,13 @@ void PrintMat(CvMat* A)
 	}
 	printf("\n");
 }
+void printVecPoint(vectorPoint &vec)
+{
+	int len = vec.size();
+	for (int i=0;i<len;i++)
+	{
+		printf("(%d,%d)\n",vec[i].x,vec[i].y);
+	}
+}
+
+	

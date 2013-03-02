@@ -14,10 +14,10 @@ public:
 	LineImage(CvSize size);
 	~LineImage();
 	IplImage *getImage();
-	int resetImageLine(CvPoint startPt,int lineLen);
+	void resetImageLine(CvPoint startPt,int lineLen);
+	void resetImageLineGroup(CvPoint startPt,int lineLen,int lineCntIngroup,int linepitch);
 public:
 	IplImage *m_pImage;
-	int m_linePitch;
 };
 
 //所有计算过程在此，与图像无关

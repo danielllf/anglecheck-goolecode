@@ -8,6 +8,8 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 struct LINEIFO{
+	LINEIFO(){}
+	LINEIFO(int linenum,int Thevalue){lineNum = linenum;value=Thevalue;}
 	int lineNum;
 	int value;
 };
@@ -19,6 +21,7 @@ public:
 	~CalcObjList();
 	void addone(int linenum,int value);
 	LINEIFO getTheMaxElement();
+
 	int getTheAvgElementValue();
 	void clearAll();
 	int Size();
@@ -54,8 +57,9 @@ public:
 	CalcObjVector();
 	CalcObjVector( std::list<LINEIFO> &srclist);
 	~CalcObjVector();
-	void addone(int linenum,int value);
+	void addone(int value,int linenum=0);
 	LINEIFO getTheMaxElement();
+	int getTheMaxElement_Linenum();
 	int getTheAvgElementValue();
 	void clearAll();
 	int Size();
