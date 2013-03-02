@@ -4,7 +4,7 @@
 #include <cxcore.h>
 #include <opencv.hpp>
 #include <highgui.h>
-
+#include "global_def.h"
 
 using namespace cv;
 
@@ -15,7 +15,7 @@ using namespace cv;
 extern int trace_level;
 extern int line_color;
 extern int color_line_tolerance;
-
+extern SYSTEMTIME sys; 
 
 /*****************以下为函数声明********************************/
 
@@ -91,5 +91,5 @@ IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitc
 
 //独立的函数打印二维数组到指定文件
 void PrintMat(CvMat* A);
-
+void printVecPoint(vectorPoint &vec);
 #endif

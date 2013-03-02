@@ -21,7 +21,7 @@ CalcObjVector::~CalcObjVector()
 {
 
 }
-void CalcObjVector::addone(int linenum,int value)
+void CalcObjVector::addone(int value,int linenum)
 {
 	LINEIFO info;
 	info.lineNum = linenum;
@@ -46,6 +46,24 @@ LINEIFO CalcObjVector::getTheMaxElement()
 		}
 	}
 	return maxSum;
+
+}	
+int CalcObjVector::getTheMaxElement_Linenum()
+{
+	std::vector<LINEIFO>:: iterator  it=m_vect.begin();
+	LINEIFO maxSum;
+	assert(m_vect.size()>0);
+	maxSum.value = it->value;
+	maxSum.lineNum = it->lineNum;
+	for (it;it!=m_vect.end();++it)
+	{
+		if (it->value>maxSum.value)
+		{
+			maxSum.value = it->value;
+			maxSum.lineNum = it->lineNum;
+		}
+	}
+	return maxSum.lineNum;
 
 }	
 int CalcObjVector::getTheAvgElementValue()
@@ -104,6 +122,7 @@ LINEIFO CalcObjList::getTheMaxElement()
 	}
 	return maxSum;
 }	
+
 int CalcObjList::getTheAvgElementValue()
 {
 	std::list<LINEIFO>:: iterator  it=m_list.begin();
@@ -137,7 +156,7 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 	int i;
 	float stainlity=1.0;//污染率
 
-	const float EPSINON = 0.0001;//float 与0值比较时注意不能直接比较
+	const float EPSINON = 0.0001f;//float 与0值比较时注意不能直接比较
 
 	while(1)
 	{
@@ -148,20 +167,25 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 		}
 		//PrintMat(mat);printf("\n+++++++++++\n");
 		cvAvgSdv(mat,&s_mean,&s_sdv);
-		stainlity = s_sdv.val[0]/s_mean.val[0];
+		stainlity = (float)s_sdv.val[0]/s_mean.val[0];
 
 
-		float diff = stainlity-(1.0-Purfactor);//杂草率
+		float diff = stainlity-(1.0f-Purfactor);//杂草率
 
 		if(diff >  EPSINON)//杂草率大于标准,/*float 0值的比较不能用==*/
 		{
 			//purify
-			for (it=m_list.begin();it!=m_list.end();++it)
+			for (it=m_list.begin();it!=m_list.end();/*++it*/)
 			{
 				//remove element that below the mean*facor_below_remove
 				if (it->value<(int)(s_mean.val[0]))
 				{
-					m_list.remove_if( isElementValueEqual(it->value));
+					//m_list.remove_if( isElementValueEqual(it->value));
+					it=m_list.erase(it);
+				}
+				else
+				{
+					it++;
 				}
 			}
 		
@@ -180,7 +204,7 @@ float CalcObjList::getLinedistanceSdvPercentToMean(int continuesLineCount,const 
 	CvScalar s_mean;
 	CvScalar s_sdv;
 	int matElementCnt = continuesLineCount-1;
-	CvMat *mat=	cvCreateMat(1,matElementCnt,CV_16U);;
+	CvMat *mat=	cvCreateMat(1,matElementCnt,CV_16U);
 	int preLinenum;
     rlt_list.clear();
 	for (int i=0;i<matElementCnt;++i)
@@ -207,7 +231,7 @@ int CalcObjList::getLinePitch(int continuesCount,float continuesTol,std::list<in
 	std::list<LINEIFO>:: iterator  it;
 	int it_startOfthisTurn;
 	float percentsdvtomean;
-	const float EPSINON = 0.0001;//float 与0值比较时注意不能直接比较
+	const float EPSINON = 0.0001f;//float 与0值比较时注意不能直接比较
 	int listlen = (int)m_list.size();	
 	CvScalar mean;
 	CvScalar sdv;
@@ -220,14 +244,14 @@ int CalcObjList::getLinePitch(int continuesCount,float continuesTol,std::list<in
 		int i=0;
 		 mean=cvScalar(0);
 		 sdv=cvScalar(0);
-		 if(continuesTol<0.05)continuesTol=0.05;
-		else if(continuesTol<0.1&&continuesTol>=0.05)continuesTol=0.1;
-		 else if(continuesTol<0.15&&continuesTol>=0.1)continuesTol=0.15;
-		  else if(continuesTol<0.2&&continuesTol>=0.15)continuesTol=0.2;
-			else if(continuesTol<0.25&&continuesTol>=0.2)continuesTol=0.25;
-			 else if(continuesTol<0.3&&continuesTol>=0.25)continuesTol=0.3;
-			  else if(continuesTol<0.35&&continuesTol>=0.3)continuesTol=0.35;
-			   else if(continuesTol<0.4&&continuesTol>=0.35)continuesTol=0.4;
+		 if(continuesTol<0.05)continuesTol=0.05f;
+		else if(continuesTol<0.1&&continuesTol>=0.05)continuesTol=0.1f;
+		 else if(continuesTol<0.15&&continuesTol>=0.1)continuesTol=0.15f;
+		  else if(continuesTol<0.2&&continuesTol>=0.15)continuesTol=0.2f;
+			else if(continuesTol<0.25&&continuesTol>=0.2)continuesTol=0.25f;
+			 else if(continuesTol<0.3&&continuesTol>=0.25)continuesTol=0.3f;
+			  else if(continuesTol<0.35&&continuesTol>=0.3)continuesTol=0.35f;
+			   else if(continuesTol<0.4&&continuesTol>=0.35)continuesTol=0.4f;
 			   else continuesTol=0.5;
 
 

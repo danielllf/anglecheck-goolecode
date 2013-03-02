@@ -1,8 +1,10 @@
 #include "cv.h"
 #include "highgui.h"
+#include "../include/global_def.h"
 #include "headers.h"
 #include "llfutility.h"
 #include <list>
+
 #if 0
 int main(int argc, char ** argv)
 {
@@ -61,26 +63,32 @@ int main()
 	//cvWaitKey();
 
 	IplImage* src;
-	if( (src=cvLoadImage("dstnosmooElipseshizix3.bmp",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
+	if( (src=cvLoadImage("dstnosmooElipseshizix2.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
 	{
 		printf("load img erro\n");
 		return -1;
 	}
+	src = g_CopyRectFromImg(src,cvRect(300,300,300,300));
 	cvThreshold( src,src,50, 100, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
 	//获取当前时间
-	SYSTEMTIME sys; 
+
 	GetLocalTime( &sys ); 
 	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
 	int pitch= getLinePitchProcess(*src);
 	printf("pitch:%d\n",pitch);
 	GetLocalTime(&sys);
 	printf( "mainEnd..%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
-    cvLine(src,cvPoint(0,70),cvPoint(1800,70),cvScalar(255));
-	IMG_SHOW("src",src);
+
+   vectorPoint vec;
+   int startline = getShiftPos(src,pitch,0.3,continuesLinecount,15,vec);
+   printf("start line:%d\n",startline);
+	printVecPoint(vec);
+   GetLocalTime(&sys);
+   printf( "after getShiftPos..%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
+   	IMG_SHOW("src",src);
 	cvSaveImage("aftersrc.jpg",src);
  cvWaitKey();
-
-
-//getchar();
+	cvReleaseImage(&src);
 	return 0;
 }
