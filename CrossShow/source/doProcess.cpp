@@ -157,6 +157,10 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 {
 	LineImage lineimgObj(cvGetSize(src) );
 	int lineLen = src->width/vectElementCount;
+	if (lineLen<3*linePitch)// 至少要能覆盖两个点
+	{
+		lineLen = 3*linePitch;
+	}
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
    int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);

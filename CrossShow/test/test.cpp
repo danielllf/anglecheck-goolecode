@@ -68,7 +68,7 @@ int main()
 		printf("load img erro\n");
 		return -1;
 	}
-	src = g_CopyRectFromImg(src,cvRect(300,300,300,300));
+	//src = g_CopyRectFromImg(src,cvRect(300,300,300,300));
 	cvThreshold( src,src,50, 100, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
 	//获取当前时间
 
