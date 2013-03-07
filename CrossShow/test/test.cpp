@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
 	return 0;
 }
 #endif
-
+#if 1
 int main()
 {
 	
@@ -61,7 +61,7 @@ int main()
 	//IMG_SHOW("IMG",img);
 
 	//cvWaitKey();
-
+	
 	IplImage* src;
 	if( (src=cvLoadImage("dstnosmooElipseshizix2.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
 	{
@@ -74,13 +74,13 @@ int main()
 
 	GetLocalTime( &sys ); 
 	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
-	int pitch= getLinePitchProcess(*src);
+	int pitch= getLinePitchProcess(*src,lineThickness);
 	printf("pitch:%d\n",pitch);
 	GetLocalTime(&sys);
 	printf( "mainEnd..%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
 
    vectorPoint vec;
-   int startline = getShiftPos(src,pitch,0.3,continuesLinecount,15,vec);
+   int startline = getShiftPos(src,pitch,lineThickness,0.3,continuesLinecount,15,vec);
    printf("start line:%d\n",startline);
 	printVecPoint(vec);
    GetLocalTime(&sys);
@@ -92,3 +92,17 @@ int main()
 	cvReleaseImage(&src);
 	return 0;
 }
+#endif
+//int main()
+//{
+//	CalcObjList cal;
+//	cal.addone(1,23);
+//cal.addone(2,24);
+//cal.addone(3,23);
+//cal.addone(4,24);
+//cal.addone(5,23);
+//std::list<LINEIFO>::iterator it = cal.m_list.begin();
+//it = cal.m_list.erase(it);
+//cal.removeWhereValueis(23);
+//	return 0;
+//}

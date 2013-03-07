@@ -180,7 +180,7 @@ float CalcObjList::PurifyTheData(float  Purfactor)
 				//remove element that below the mean*facor_below_remove
 				if (it->value<(int)(s_mean.val[0]))
 				{
-					//m_list.remove_if( isElementValueEqual(it->value));
+					//m_list.remove_if( isElementValueEqual(it->value));//用remove可能会导致错误
 					it=m_list.erase(it);
 				}
 				else
