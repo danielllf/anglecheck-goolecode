@@ -11,13 +11,14 @@
 
 class LineImage{
 public:
-	LineImage(CvSize size);
+	LineImage(CvSize size,int lineThick);
 	~LineImage();
 	IplImage *getImage();
 	void resetImageLine(CvPoint startPt,int lineLen);
 	void resetImageLineGroup(CvPoint startPt,int lineLen,int lineCntIngroup,int linepitch);
 public:
 	IplImage *m_pImage;
+	int m_lineThickness;
 };
 
 //所有计算过程在此，与图像无关
