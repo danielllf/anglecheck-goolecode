@@ -63,7 +63,7 @@ int main()
 	//cvWaitKey();
 	
 	IplImage* src;
-	if( (src=cvLoadImage("dstnosmooElipseshizix2.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
+	if( (src=cvLoadImage("dstnosmooElipseshizix.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
 	{
 		printf("load img erro\n");
 		return -1;
@@ -74,13 +74,13 @@ int main()
 
 	GetLocalTime( &sys ); 
 	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
-	int pitch= getLinePitchProcess(*src,lineThickness);
+	int pitch= getLinePitchProcess(*src);
 	printf("pitch:%d\n",pitch);
 	GetLocalTime(&sys);
 	printf( "mainEnd..%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
 
    vectorPoint vec;
-   int startline = getShiftPos(src,pitch,lineThickness,0.3,continuesLinecount,15,vec);
+   int startline = getShiftPos(src,pitch, allowedPercentTOLwhenShifting,continuesLinecount,15,vec);
    printf("start line:%d\n",startline);
 	printVecPoint(vec);
    GetLocalTime(&sys);
