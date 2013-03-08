@@ -8,8 +8,8 @@ int continuesLinecount = 6;//间距均匀的连续线的条数
 int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
 //此值如果未找到，则会从0.05开始，以台阶0.05向上递增，直到找到为止
 float continuesTol=0.03;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
-int lineThickness=3;
-
+int lineThickness=2;
+double allowedPercentTOLwhenShifting = 0.5;
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -25,18 +25,18 @@ int getSumOfLineMask(IplImage* src,IplImage* lineImg)
 	 cvReleaseImage(&rltimg);
 	return  sum;
 }
-void setImgLineGroup(IplImage* src,std::list<int> linelist,int lineThick)
+void setImgLineGroup(IplImage* src,std::list<int> linelist)
 {
 	std::list<int>::iterator it=linelist.begin();
 	for (it;it!=linelist.end();++it)
 	{
-		cvLine(src,cvPoint(0,*it),cvPoint(src->width,*it),cvScalar(255),lineThick);
+		cvLine(src,cvPoint(0,*it),cvPoint(src->width,*it),cvScalar(255));
 	}
 }
 
-int getLinePitchProcess(IplImage &src,int lineThick)
+int getLinePitchProcess(IplImage &src)
 {
-	LineImage lineimgObj(cvGetSize(&src),lineThick);
+	LineImage lineimgObj(cvGetSize(&src),lineThickness);
 
 	int sumAtlinePos;
 	CvScalar sumSrc = cvSum(&src);
@@ -106,7 +106,7 @@ int getLinePitchProcess(IplImage &src,int lineThick)
 	std::list<int> line_list;
 	int pitch=final_calc.getLinePitch(continuesLinecount,continuesTol,line_list);
 #ifdef showLineGroup
-		setImgLineGroup(&src,line_list,lineThickness);
+		setImgLineGroup(&src,line_list);
 #endif
    
 	return pitch;
@@ -153,9 +153,9 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 #endif
 	return findLine;
 }
- int getShiftPos(IplImage *src,int linePitch,int lineThick, double pitchTol,int lineCntInGroup,int vectElementCount,vectorPoint &vect)
+ int getShiftPos(IplImage *src,int linePitch, double pitchTol,int lineCntInGroup,int vectElementCount,vectorPoint &vect)
 {
-	LineImage lineimgObj(cvGetSize(src) , lineThick);
+	LineImage lineimgObj(cvGetSize(src) , lineThickness);
 	int lineLen = src->width/vectElementCount;
 	if (lineLen<3*linePitch)// 至少要能覆盖两个点
 	{
