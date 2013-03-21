@@ -4,43 +4,55 @@
 #include "headers.h"
 #include "llfutility.h"
 #include <list>
+/*
+1>获取linepitch（此时的图中linelen长度内不能有垂直分界线）
+2>求出每个子图的垂直分界线
+3>计算每个子图的偏移相对坐标
+4>将每个子图的相对坐标合并成一副图的整体坐标
 
+*/
 #if 0
 int main(int argc, char ** argv)
 {
-	int thresholdBW = 30;
-	cvNamedWindow("image");
-	IplImage * src = cvLoadImage("../test/shizix.jpg", 0);
+	int thresholdBW = 10;
+	//cvNamedWindow("image");
+	IplImage * src = cvLoadImage("IMG_6995_1.bmp", 0);
 	if(src==NULL){printf("load file erro\n");return -1;}
-	IplImage * temp = cvCreateImage(cvGetSize(src), 8,1);
-	IplImage * img=cvCreateImage(cvGetSize(src), 8, 1);
-	cvCopyImage(src,temp);
-	cvCopyImage(src, img);
+	cvNot(src,src);
+IplImage *subImg =g_CopyRectFromImg(src,cvRect(0,0,600,400));
+	IplImage *scaledImg = g_resizeImage(subImg,1.00);
+
+	IplImage * temp = cvCreateImage(cvGetSize(scaledImg), 8,1);
+	IplImage * img=cvCreateImage(cvGetSize(scaledImg), 8, 1);
+	cvCopyImage(scaledImg,temp);
+	cvCopyImage(scaledImg, img);
 
 	 IplConvKernel *element = 0; //定义形态学结构指针
-    element = cvCreateStructuringElementEx(3,3, 1, 1, CV_SHAPE_ELLIPSE, 0);//3,5,7
+    element = cvCreateStructuringElementEx(3,3, 1, 1, CV_SHAPE_RECT, 0);//3,5,7
 	
 	
 	//“黑帽”
 	cvMorphologyEx(
-		src,
+		scaledImg,
 		img,
 		temp,
 		NULL,//element,// //default 3*3
-		CV_MOP_BLACKHAT,
+		CV_MOP_BLACKHAT,//CV_MOP_BLACKHAT,
 		1);
-
-
+	//cvShowImage("src", src);
+	cvShowImage("imagecaled", scaledImg);
 	cvShowImage("image", img);
+	cvWaitKey();
 	
 	IplImage* dst = cvCreateImage(cvGetSize(img),img->depth,img->nChannels);
 	cvThreshold( img, dst,thresholdBW, 255, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
+  
 
-	IplImage *scaledImg = g_resizeImage(dst,1.005);
-	cvErode( scaledImg, scaledImg,element);//腐蚀
-	 cvThreshold( scaledImg, scaledImg,thresholdBW, 255, CV_THRESH_BINARY );
-	cvSaveImage("dstnosmooElipseshizix2.jpg",scaledImg);
-	cvShowImage("scaledImg", scaledImg);
+	//cvErode( scaledImg, scaledImg,element);//腐蚀
+	//cvThreshold( dst, dst,thresholdBW, 255, CV_THRESH_BINARY );
+	 //cvAdaptiveThreshold(img,dst,255.0,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV,3,6);
+	cvSaveImage("dstnosmooElipseshizix2.bmp",dst);
+	cvShowImage("scaledImg", dst);
 	cvWaitKey();
 	 
 	cvReleaseImage(&temp);
@@ -55,19 +67,20 @@ int main(int argc, char ** argv)
 int main()
 {
 	
-	//IplImage* img=g_CreateCrossImage(cvSize(640,480),3,20);
-	//LineImage lineimgObj(cvGetSize(img));
-	//cvSaveImage("manualed_cross_show6.bmp",img);
-	//IMG_SHOW("IMG",img);
+	int thresholdBW = 10;
+	IplImage * src1 = cvLoadImage("IMG_6995_1.bmp", 0);
+	if(src1==NULL){printf("load file erro\n");return -1;}
+	//cvNot(src,src);
+	IplImage *subImg =g_CopyRectFromImg(src1,cvRect(0,0,600,400));
+	IplImage *scaledImg = g_resizeImage(subImg,1.00);
 
-	//cvWaitKey();
-	
-	IplImage* src;
-	if( (src=cvLoadImage("dstnosmooElipseshizix.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
-	{
-		printf("load img erro\n");
-		return -1;
-	}
+	IplImage* src=getMorphologyImg(scaledImg,CV_MOP_BLACKHAT,thresholdBW);
+	//IplImage* src;
+	//if( (src=cvLoadImage("dstnosmooElipseshizix23.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
+	//{
+	//	printf("load img erro\n");
+	//	return -1;
+	//}
 	//src = g_CopyRectFromImg(src,cvRect(300,300,300,300));
 	cvThreshold( src,src,50, 100, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
 	//获取当前时间

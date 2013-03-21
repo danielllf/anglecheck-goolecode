@@ -13,7 +13,6 @@
 
 int getLinePitchProcess(IplImage &src);
 
-int getSumOfLineMask(IplImage* src,IplImage* lineImg);
 
 //在查找偏移之前，先要找到作为标准的那一行。
 int getTheStarLine(LineImage &lineimgObj,IplImage *src,int lineCntInGroup,int lineLen);

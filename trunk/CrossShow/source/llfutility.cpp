@@ -315,5 +315,14 @@ void printVecPoint(vectorPoint &vec)
 		printf("(%d,%d)\n",vec[i].x,vec[i].y);
 	}
 }
-
+//返回以lineimg中line位置覆盖下的两图像之和,以line为mask
+int getSumOfLineMask(IplImage* src,IplImage* lineImg)
+{
+	IplImage *rltimg = cvCreateImage(cvGetSize(src),src->depth,src->nChannels);
+	cvSet(rltimg,cvScalar(0));
+	cvAdd(src,lineImg,rltimg,lineImg);
+	int sum = (int)cvSum(rltimg).val[0];
+	cvReleaseImage(&rltimg);
+	return  sum;
+}
 	
