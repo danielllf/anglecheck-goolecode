@@ -4,7 +4,7 @@
 #include "../include/llfutility.h"
 unsigned char cmpLineLen=500;
 float Purfactor = 0.9;
-int continuesLinecount = 6;//间距均匀的连续线的条数
+int continuesLinecount = 6;//间距均匀的连续平行线的条数
 int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
 //此值如果未找到，则会从0.05开始，以台阶0.05向上递增，直到找到为止
 float continuesTol=0.03;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
@@ -15,16 +15,7 @@ enum Pos_STATUS{
 	 OnMoutain
 };
 
-//返回以lineimg中line位置覆盖下的两图像之和,以line为mask
-int getSumOfLineMask(IplImage* src,IplImage* lineImg)
-{
-	IplImage *rltimg = cvCreateImage(cvGetSize(src),src->depth,src->nChannels);
-	cvSet(rltimg,cvScalar(0));
-	 cvAdd(src,lineImg,rltimg,lineImg);
-	 int sum = (int)cvSum(rltimg).val[0];
-	 cvReleaseImage(&rltimg);
-	return  sum;
-}
+
 void setImgLineGroup(IplImage* src,std::list<int> linelist)
 {
 	std::list<int>::iterator it=linelist.begin();

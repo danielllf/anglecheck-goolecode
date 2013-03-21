@@ -92,4 +92,6 @@ IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitc
 //独立的函数打印二维数组到指定文件
 void PrintMat(CvMat* A);
 void printVecPoint(vectorPoint &vec);
+int getSumOfLineMask(IplImage* src,IplImage* lineImg);
+
 #endif
