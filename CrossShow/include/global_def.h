@@ -14,13 +14,12 @@ enum{
 };
 
 #define debug_ShowTime 
-//#define showLineGroup 
+#define showLineGroup 
 #define  ShowLineSect 
 typedef std::vector<CvPoint> vectorPoint;
 typedef std::vector<int> vectorInt;
 /*****************以下为变量声明********************************/
 
 
-extern int WHITE_PART;
 
 #endif

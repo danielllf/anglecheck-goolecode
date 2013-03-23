@@ -30,7 +30,7 @@ public:
 	float PurifyTheData(float  Purfactor);
 	float getLinedistanceSdvPercentToMean(int continuesLineCount,const std::list<LINEIFO>:: iterator  it_start,CvScalar &mean
 																		,CvScalar &sdv,std::list<int> &rlt_list);
-	int getLinePitch(int continuesCount,float continuesTol,std::list<int> &rlt_list);
+	int getLinePitch(int continuesCount,float &continuesTol,std::list<int> &rlt_list);
 	std::list<LINEIFO> m_list;
 private:
 

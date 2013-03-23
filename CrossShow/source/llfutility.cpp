@@ -270,7 +270,7 @@ IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitc
 			if(j%pitch==0&&i%pitch==0)
 			{
 				cvSetImageROI(blackimg,cvRect(j,i,spotSideLen,spotSideLen));
-				cvAddS(blackimg,cvScalar(WHITE_PART),blackimg);
+				cvAddS(blackimg,cvScalar(255),blackimg);
 				cvResetImageROI(blackimg);
 			}
 		}

@@ -36,4 +36,5 @@ extern int safeVoidpitchCycleCntIngetStartLine ;//在计算cmp starline时，去除图片
 extern float continuesTol;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
 extern int lineThickness;
 extern double allowedPercentTOLwhenShifting;
+
 #endif
