@@ -4,6 +4,7 @@
 #include "headers.h"
 #include "llfutility.h"
 #include <list>
+#include "prepare.h"
 /*
 1>获取linepitch（此时的图中linelen长度内不能有垂直分界线）
 2>求出每个子图的垂直分界线
@@ -66,24 +67,21 @@ IplImage *subImg =g_CopyRectFromImg(src,cvRect(0,0,600,400));
 #if 1
 int main()
 {
-	
-	int thresholdBW = 10;
-	IplImage * src1 = cvLoadImage("IMG_6995_1.bmp", 0);
-	if(src1==NULL){printf("load file erro\n");return -1;}
-	//cvNot(src,src);
-	IplImage *subImg =g_CopyRectFromImg(src1,cvRect(0,0,600,400));
-	IplImage *scaledImg = g_resizeImage(subImg,1.00);
 
-	IplImage* src=getMorphologyImg(scaledImg,CV_MOP_BLACKHAT,thresholdBW);
-	//IplImage* src;
-	//if( (src=cvLoadImage("dstnosmooElipseshizix23.jpg",0))==NULL)//如使用压缩图片，如jpg，会造成图像数据损失。
-	//{
-	//	printf("load img erro\n");
-	//	return -1;
-	//}
-	//src = g_CopyRectFromImg(src,cvRect(300,300,300,300));
-	cvThreshold( src,src,50, 100, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
+	int thresholdBW = 10;
+	IplImage * src1 = cvLoadImage("6955_600_400_1.bmp", 0);
+	if(src1==NULL){printf("load file erro\n");return -1;}
+	//IplImage *subImg =g_CopyRectFromImg(src1,cvRect(0,0,600,400));
+	cvThreshold(src1,src1,5,255.0,CV_THRESH_BINARY);
+
+	int x = getX_cordinateofVerticalBar(src1,14,1.5,TARGETPOS_LEFT,10,100,true);
 	//获取当前时间
+	getchar();return 0;
+	//cvSaveImage("6955_600_400.bmp",subImg);
+	IplImage *scaledImg =src1; //g_resizeImage(subImg,1.00);
+	IplImage* src=getMorphologyImg(scaledImg,CV_MOP_TOPHAT,thresholdBW);
+
+	cvThreshold( src,src,50, 100, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
 
 	GetLocalTime( &sys ); 
 	printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 

@@ -2,14 +2,16 @@
 #include "../include/global_def.h"
 #include "../include/headers.h"
 #include "../include/llfutility.h"
-unsigned char cmpLineLen=500;
+#include "../include/prepare.h"
+unsigned char cmpLineLen=200;
 float Purfactor = 0.9;
-int continuesLinecount = 6;//间距均匀的连续平行线的条数
+int continuesLinecount = 4;//间距均匀的连续平行线的条数
 int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
 //此值如果未找到，则会从0.05开始，以台阶0.05向上递增，直到找到为止
 float continuesTol=0.03;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
 int lineThickness=2;
-double allowedPercentTOLwhenShifting = 0.5;
+double allowedPercentTOLwhenShifting = 0.3;
+
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -27,7 +29,7 @@ void setImgLineGroup(IplImage* src,std::list<int> linelist)
 
 int getLinePitchProcess(IplImage &src)
 {
-	LineImage lineimgObj(cvGetSize(&src),lineThickness);
+	LineImage lineimgObj(cvGetSize(&src),lineThickness,whiteLineWeight);
 
 	int sumAtlinePos;
 	CvScalar sumSrc = cvSum(&src);
@@ -146,7 +148,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 }
  int getShiftPos(IplImage *src,int linePitch, double pitchTol,int lineCntInGroup,int vectElementCount,vectorPoint &vect)
 {
-	LineImage lineimgObj(cvGetSize(src) , lineThickness);
+	LineImage lineimgObj(cvGetSize(src) , lineThickness,whiteLineWeight);
 	int lineLen = src->width/vectElementCount;
 	if (lineLen<3*linePitch)// 至少要能覆盖两个点
 	{
@@ -155,6 +157,11 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
    int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
+#ifdef debug_ShowTime
+   GetLocalTime( &sys ); 
+   printf( "after getTheStarLine...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+#endif
+
    int preLine=starLine;
    CvPoint startPt;
 	for (int i=0;i<vectElementCount;++i)
