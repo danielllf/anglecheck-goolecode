@@ -13,6 +13,7 @@ using namespace cv;
 /*****************以下为变量声明********************************/
 
 extern int trace_level;
+extern int log2file;
 extern int line_color;
 extern int color_line_tolerance;
 extern SYSTEMTIME sys; 
@@ -43,21 +44,26 @@ inline void RoudToInt(int &val,double dval)
 
 //跟踪打印
 //设置三级跟踪
+
 //level ==0:关闭跟踪
-//level ==1:只打印息本身，而不打印时间，文件名和行号，函数名等
-//level ==2:打印形如 "时间，函数名,行号==>>信息内容"
-void trace(int level, const char *fmt, ...);
-
+//level ==1:只打印错误信息
+//level ==2:打印所有信息，包括运行过程记录
+//void trace(int level, const char *fmt, ...);
+//curtrace_level 有以下两个选择
+#define  LLF_TARCE_ERRO 1  
+#define  LLF_TARCE_PROCESS 2
 //与trace类似，只是没加入等级控制
- void llf_error (const char *fmt, ...);
+ void llf_error (int curtrace_level,char*file,int line,const char *fmt, ...);
 
+#define  log_erro(fmt, ...) llf_error(LLF_TARCE_ERRO, __FILE__,__LINE__,fmt, ##__VA_ARGS__);
+#define log_process(fmt, ...) llf_error(LLF_TARCE_PROCESS, __FILE__,__LINE__,fmt, ##__VA_ARGS__);
 
 //color all lines within line_num+/-tolerance
 void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int color);
 
 
 //解析配置参数文件
-int parse_configfile(const char* filename);
+//int parse_configfile(const char* filename);
 
 //用线来划分图像
 void formatImg(IplImage* img,int pitch, int line_thick=1);
@@ -76,7 +82,7 @@ void g_showImgRect(IplImage *showImgSrc, CvRect rect);
 /**
 *初始化所有配置参数，由配置文件读入
 */
-void initParms();
+//void initParms();
 
 //从sample获取presample图
 //picName:生成的图片名字
@@ -93,5 +99,5 @@ IplImage * g_CreateCrossImage(CvSize size,int spotSideLen/*正方形边长*/,int pitc
 void PrintMat(CvMat* A);
 void printVecPoint(vectorPoint &vec);
 int getSumOfLineMask(IplImage* src,IplImage* lineImg);
-
+void PrintTime(char* info);
 #endif

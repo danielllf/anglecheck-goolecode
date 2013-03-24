@@ -1,0 +1,3 @@
+log2file 0 #是否打印到文件 0为到screen
+TraceLevel 2 #0==not printf 1==print erro,  2==printf all the info
+whiteLineWeight 50 #白色线段的重量，应该尽量小，计算量小

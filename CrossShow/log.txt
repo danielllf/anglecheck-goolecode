@@ -1,0 +1,16 @@
+file f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:79testerro
+file f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:79testerro
+file f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:80process
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:79 testerro
+process
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:79 testerro
+13:50:15process
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:79 testerro
+13:50:50=>process
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:182 Invalid parm TraceLevel: hÿ
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:84 testerro
+14:09:12=>process
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:182 Invalid parm TraceLevel: hÿ
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:84 testerro
+14:09:12=>process
+f:\programm data\vs\anglecheck-goolecode\crossshow\test\test.cpp,line:182 Invalid parm TraceLevel: hÿ

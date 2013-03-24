@@ -5,9 +5,13 @@ int whiteLineWeight = 50;
 //imgPitch:要提前知道图像的pitch
 //1个vertical短线,sum不变化时，认为找到了vertical line
 //返回x-cordiante of the found bar
-//targetPos:目标图像是最左端，中端，右端
-int getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,float verticalbarTimesOfpictch,int targetPos, int y_cordinate,int x_cordStart,bool showResultMark)
+//subImageType:最左端（图中会有1个分割线），中端(图中会有2个分割线)
+CORDINATE_PAIR getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,float verticalbarTimesOfpictch,int subImageType, int y_cordinate,int x_cordStart,bool showResultMark)
 {
+	CORDINATE_PAIR cordpair;
+	cordpair.left_cordinate=-1;
+	cordpair.right_cordinate=-1;
+
 	//1.cal the vertical bar length an y_cordinate
 	int verticabarLen = verticalbarTimesOfpictch*imgPitch;
 	if (verticabarLen+y_cordinate>=bineryImg->height)
@@ -36,17 +40,31 @@ int getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,float verticalb
 					linepos = LINEPOS_ONLINE;
 			}
 			else
-			{
+			{//offline now
+				//online--> offline说明找到一条vertical bar。从line的右边缘结束
 				if (linepos==LINEPOS_ONLINE)
-				{//online--> offline时。从line的右边缘结束
+				{
 					findcout++;
-					if(targetPos==TARGETPOS_MIDDLE)
+					if(subImageType==TARGETTYPE_MIDDLE)
 					{
 						if (findcout==1)
 						{
+							cordpair.left_cordinate=i;
 							linepos = LINEPOS_OFFLINE;
 						    continue;
 						}
+						if (findcout==2)
+						{
+							cordpair.right_cordinate=i;
+						}
+					}
+					if (subImageType==TARGETTYPE_LEFT)
+					{
+						cordpair.right_cordinate=i;
+					}
+					if (subImageType==TARGETTYPE_RIGHT)
+					{
+						cordpair.left_cordinate=i;
 					}
 					if(showResultMark)
 					{
@@ -56,15 +74,15 @@ int getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,float verticalb
 						IMG_SHOW("rlt",rlt);
 						cvWaitKey();
 					}
-					return i;
+					return cordpair;
 				}
 				linepos = LINEPOS_OFFLINE;
 			}
 		}
 
-	return -1;//not found
+	return cordpair;//not found
 }
-IplImage *getMorphologyImg(IplImage* src,int operation,int thresholdBW, int isShowResultImg, int achorCordnate)
+IplImage *getMorphologyImg(IplImage* src,int operation,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
 {
 
 	IplImage * temp = cvCreateImage(cvGetSize(src), 8,1);
@@ -86,8 +104,15 @@ IplImage *getMorphologyImg(IplImage* src,int operation,int thresholdBW, int isSh
 		1);
 
 	IplImage* dst = cvCreateImage(cvGetSize(img),img->depth,img->nChannels);
-	cvThreshold( img, dst,thresholdBW, 255.0, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
-	if(isShowResultImg)
+	if (isAdaptiveThres)
+	{
+		cvAdaptiveThreshold(img,dst,255.0,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV,3,5);
+	}
+	else
+	{
+		cvThreshold( img, dst,thresholdBW, 255.0, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
+	}
+	//if(isShowResultImg)
 	{
 		cvShowImage("MorphologyImgBinery", dst);
 		cvWaitKey();
