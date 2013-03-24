@@ -4,7 +4,8 @@
 #include "../include/llfutility.h"
 
 
- int trace_level = 0;//用于trace函数等级控制
+ int trace_level = 2;//用于等级控制
+ int log2file = 1;//是否打印到文件(1)还是屏幕(0)
 static int color_line_tolerance =1;
 static int line_color = BLACK;
 static FILE* g_logfile=NULL; 
@@ -46,134 +47,37 @@ void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int co
 	}
 
 }
+
 //打印形如 "时间，函数名,行号==>>信息内容"
-void llf_error(const char *fmt, ...)
+void llf_error (int curtrace_level,char*file,int line,const char *fmt, ...)
 {
+	if (curtrace_level>trace_level)return;
+	FILE* pFile=NULL;
+
+	if (log2file)
+	{
+		pFile=g_logfile;
+		pFile = fopen("log.txt","a");
+	}
+	else
+	{
+		pFile = stderr;
+	}
 	va_list vl;
 	va_start(vl, fmt);
+	if(curtrace_level==1)fprintf(pFile,"%s,line:%d ",file,line);
+	if (curtrace_level==2)fprintf(pFile,__TIME__"=>");
 
-	fprintf(stderr,"Time:"__DATE__","__TIME__",Func:"__FUNCTION__",Line:%05d==>> #erro#:", __LINE__);
-	vfprintf(stderr, fmt, vl);
-
-	va_end(vl);
-}
-
-
-void trace(int level, const char *fmt, ...)
-{
-	if (0 == level) return;
-
-	va_list vl;
-	va_start(vl, fmt);
-	 if(2 == level)
-		fprintf(stderr,"Time:"__DATE__","__TIME__",Func:"__FUNCTION__",Line:%05d==>> ", __LINE__);
-	vfprintf(stderr, fmt, vl);
+	vfprintf(pFile, fmt, vl);
 
 	va_end(vl);
-}
-static void get_arg(char *buf, int buf_size, const char **pp)
-{
-	const char *p;
-	char *q;
-	int quote;
-
-	p = *pp;
-	while (isspace(*p)) p++;
-	q = buf;
-	quote = 0;
-	if (*p == '\"' || *p == '\'')
-		quote = *p++;
-	for(;;) {
-		if (quote) {
-			if (*p == quote)
-				break;
-		} else {
-			if (isspace(*p))
-				break;
-		}
-		if (*p == '\0')
-			break;
-		if ((q - buf) < buf_size - 1)
-			*q++ = *p;
-		p++;
-	}
-	*q = '\0';
-	if (quote && *p == quote)
-		p++;
-	*pp = p;
+	fclose(pFile);
 }
 
 
-int parse_configfile(const char* filename)
-{
-	FILE *f;
-	char line[1024];
-	char cmd[64];
-	char arg[1024];
-	const char *p;
-	int val;
-
-	f = fopen(filename, "r");
-	if (!f) {
-		perror(filename);
-		return -1;
-	}
-
-	for(;;) {
-		if (fgets(line, sizeof(line), f) == NULL)
-			break;
-		p = line;
-		while (isspace(*p))
-			p++;
-		if (*p == '\0' || *p == '#')
-			continue;
-
-		get_arg(cmd, sizeof(cmd), &p);
-
-		if (!strcmp(cmd, "TraceLevel")) {
-			get_arg(arg, sizeof(arg), &p);
-			val = atoi(arg);
-			if (val < 0 || val > 2) {
-				llf_error("Invalid TraceLevel: %s\n", arg);
-				return -1;
-			}
-			trace_level = val;
-		}
-		else if(!strcmp(cmd,"ColorLineTol"))
-		{
-			get_arg(arg, sizeof(arg), &p);
-			val = atoi(arg);
-			if (val<0)
-			{
-				llf_error("Invalid ColorLineTol:%s\n",arg);
-				return -1;
-			}
-			color_line_tolerance = val;
-		}
-		else if(!strcmp(cmd,"LineColor"))
-		{
-			get_arg(arg, sizeof(arg), &p);
-			val = atoi(arg);
-			if (val<0||val>255)
-			{
-				llf_error("Invalid LineColor:%s\n",arg);
-				return -1;
-			}
-			line_color = val;
-		}
 
 
-	}
 
-	fclose(f);
-	return 0;
-}
-void initParms()
-{ 
-	g_logfile = fopen("log.txt","w");
-	parse_configfile("../cvtest/calangle.conf");
-
-}
 void formatImg(IplImage* img,int pitch, int line_thick)
 {
 	using namespace cv;
@@ -188,14 +92,14 @@ void formatImg(IplImage* img,int pitch, int line_thick)
 		if(i%pitch!=0)continue;
 		if(i%color_span==0)
 		{
-			llf_error("i modcolor_span,i=%d\n",i);
+			log_process("i modcolor_span,i=%d\n",i);
 			if(cur_color.val[0] == black.val[0])
 			{cur_color = white;
-			llf_error("cur_color==white\n");
+			log_process("cur_color==white\n");
 			}
 			else if(cur_color.val[0] == white.val[0])
 			{cur_color = black;
-			llf_error("cur_color==black\n");
+			log_process("cur_color==black\n");
 			}
 		}
 
@@ -325,4 +229,10 @@ int getSumOfLineMask(IplImage* src,IplImage* lineImg)
 	cvReleaseImage(&rltimg);
 	return  sum;
 }
-	
+void PrintTime(char* info)
+{
+	GetLocalTime( &sys ); 
+	printf("%s...",info);
+	printf( " %02d:%02d:%02d.%03d \n",sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
+}

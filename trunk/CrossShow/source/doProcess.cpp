@@ -85,15 +85,13 @@ int getLinePitchProcess(IplImage &src)
 		pre_linePos = current_linePos;
 	}
 #ifdef debug_ShowTime
-	GetLocalTime( &sys ); 
-	printf( "before purifydata...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+	PrintTime("before purifydata");
 #endif
 
 	int purity = final_calc.PurifyTheData(Purfactor);
 
 #ifdef debug_ShowTime
-	GetLocalTime( &sys ); 
-	printf( "after purifydata...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+	PrintTime("after purifydata");
 #endif
 
 	std::list<int> line_list;
@@ -146,20 +144,28 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 #endif
 	return findLine;
 }
- int getShiftPos(IplImage *src,int linePitch, double pitchTol,int lineCntInGroup,int vectElementCount,vectorPoint &vect)
+ int getShiftPos(IplImage *src,int linePitch, double pitchTol,int lineCntInGroup,int &vectElementCount,vectorPoint &vect)
 {
 	LineImage lineimgObj(cvGetSize(src) , lineThickness,whiteLineWeight);
-	int lineLen = src->width/vectElementCount;
-	if (lineLen<3*linePitch)// 至少要能覆盖两个点
+	int lineLen = 0;
+	while(1)
 	{
-		lineLen = 3*linePitch;
+		 lineLen = src->width/vectElementCount;
+
+		if (lineLen<3*linePitch)// 至少要能覆盖3个点
+		{
+			vectElementCount--;
+
+			continue;
+		}
+		break;
 	}
+
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
    int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
 #ifdef debug_ShowTime
-   GetLocalTime( &sys ); 
-   printf( "after getTheStarLine...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+   PrintTime("after getTheStarLine");
 #endif
 
    int preLine=starLine;
@@ -173,3 +179,30 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 	}
    return starLine;
 }
+
+ void getShiftPosProcess(IplImage* src,vecCordinate rltvec,CORDINATE_PAIR cordiPair )
+ {
+	 int thresholdBW =10;
+	IplImage *img = g_CopyRectFromImg(src,cvRect(cordiPair.left_cordinate,0,cordiPair.right_cordinate-cordiPair.left_cordinate,src->height));
+	IplImage* morphImg=getMorphologyImg(img,CV_MOP_TOPHAT,thresholdBW);
+
+	cvThreshold( src,src,50, 100, CV_THRESH_BINARY); //取阈值把图像转为二值图像
+
+	PrintTime("mainStarrrr");	
+	int pitch= getLinePitchProcess(*src);
+	printf("pitch:%d\n",pitch);
+	PrintTime("mainEnd");
+
+	vectorPoint vec;
+	int secCnt = 15;
+	int startline = getShiftPos(src,pitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,vec);
+	printf("start line:%d\n",startline);
+	printVecPoint(vec);
+	PrintTime("after getShiftPos");
+
+	IMG_SHOW("src",src);
+	cvSaveImage("aftersrc.jpg",src);
+	cvWaitKey();
+	cvReleaseImage(&src);
+	cvReleaseImage(&img);
+ }

@@ -8,8 +8,8 @@
 #include <vector>
 #include "global_def.h"
 #include "LineImage.h"
-
-
+#include "prepare.h"
+typedef std::vector<CORDINATE_PAIR> vecCordinate;
 
 int getLinePitchProcess(IplImage &src);
 
@@ -23,9 +23,11 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 //获取每一行像素的上下偏移数据。
 //返回 int 型为始的作为参考的线行号
 //vect 返回为一个vect，每个成员为一个线段相对于第一个线段的偏移像素个数
- int getShiftPos(IplImage *src,int linePitch,double pitchTol,int lineCntInGroup,int vectElementCount,vectorPoint &vect);
+ int getShiftPos(IplImage *src,int linePitch,double pitchTol,int lineCntInGroup,int &vectElementCount,vectorPoint &vect);
 //set line white from ref the line num in linelist
 void setImgLineGroup(IplImage* src,std::list<int> linelist);
+
+void getShiftPosProcess(IplImage* src,vecCordinate rltvec,CORDINATE_PAIR cordiPair );
 
 /************变量声明**************************/
 extern unsigned char cmpLineLen;
