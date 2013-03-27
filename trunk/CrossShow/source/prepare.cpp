@@ -3,6 +3,7 @@
 #include "LineImage.h"
 int whiteLineWeight = 50;
 //imgPitch:要提前知道图像的pitch
+//verticalbarTimesOfpictch:适竖杠的的长度，要至少要大于imgPitch
 //1个vertical短线,sum不变化时，认为找到了vertical line
 //返回x-cordiante of the found bar
 //subImageType:最左端（图中会有1个分割线），中端(图中会有2个分割线)
@@ -12,7 +13,7 @@ CORDINATE_PAIR getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,floa
 	cordpair.left_cordinate=-1;
 	cordpair.right_cordinate=-1;
 
-	//1.cal the vertical bar length an y_cordinate
+	//1.cal the vertical bar length and y_cordinate
 	int verticabarLen = verticalbarTimesOfpictch*imgPitch;
 	if (verticabarLen+y_cordinate>=bineryImg->height)
 	{
@@ -61,10 +62,12 @@ CORDINATE_PAIR getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,floa
 					if (subImageType==TARGETTYPE_LEFT)
 					{
 						cordpair.right_cordinate=i;
+						cordpair.left_cordinate = 0;
 					}
 					if (subImageType==TARGETTYPE_RIGHT)
 					{
 						cordpair.left_cordinate=i;
+						cordpair.right_cordinate = bineryImg->width;
 					}
 					if(showResultMark)
 					{
@@ -119,6 +122,7 @@ IplImage *getMorphologyImg(IplImage* src,int operation,bool isAdaptiveThres,int 
 	}
 	cvReleaseImage(&temp);
 	cvReleaseImage(&img);
+	
 
 	return dst;
 }

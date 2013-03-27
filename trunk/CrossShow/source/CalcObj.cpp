@@ -148,13 +148,19 @@ int CalcObjList::Size()
 }
 float CalcObjList::PurifyTheData(float  Purfactor)
 {
+	float stainlity=1.0;//污染率
+	if(m_list.size()==0)
+	{
+		log_erro("list count in CalcObjList is 0\n");
+		return -1;
+	}
 	//convert list to mat for using cvAvgSdv
 	CvScalar s_mean;
 	CvScalar s_sdv;
 	CvMat *mat;
 	std::list<LINEIFO>:: iterator  it;
 	int i;
-	float stainlity=1.0;//污染率
+	
 
 	const float EPSINON = 0.0001f;//float 与0值比较时注意不能直接比较
 

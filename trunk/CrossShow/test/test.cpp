@@ -72,32 +72,25 @@ return 0;
 }
 #endif
 
-#if 9
+#if 0
 int main()
 {
-initParms();
+	initParms();
 	int thresholdBW = 10;
-	IplImage * src1 = cvLoadImage("left_0.bmp", 0);
+	IplImage * src1 = cvLoadImage("6955_600_400.bmp", 0);
 	if(src1==NULL){printf("load file erro\n");return -1;}  
-// llf_error(2,"hello\n");
+  log_erro("hello\n");
 
-   log_erro("testerro%d\n",5);
-   log_process("process\n");
-	//cvThreshold(src1,src1,5,255.0,CV_THRESH_BINARY);
 
 	//CORDINATE_PAIR cordPair= getX_cordinateofVerticalBar(src1,14,1.5,TARGETTYPE_RIGHT,10,305,true);
 	
 
 	//cvSaveImage("6955_600_400.bmp",subImg);
 	
-	IplImage* src=getMorphologyImg(src1,CV_MOP_TOPHAT);
-
-	cvThreshold( src,src,50, 100, CV_THRESH_BINARY); //取阈值把图像转为二值图像
-
-	//GetLocalTime( &sys ); 
-	//printf( "mainStart...%4d/%02d/%02d %02d:%02d:%02d.%03d \n",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+	IplImage* src=getMorphologyImg(src1,CV_MOP_TOPHAT,false,10);
+	
 	PrintTime("mainStarrrr");
-	int pitch= getLinePitchProcess(*src);
+	int pitch= getLinePitchProcess(src);
 	printf("pitch:%d\n",pitch);
 	PrintTime("mainEnd");
 
@@ -116,8 +109,41 @@ initParms();
 	return 0;
 }
 #endif
+#if 9
+int main()
+{
+	initParms();
+	int subImgCnt=3;
+	vectorPoint vec1,vec2,vec3;
+	int secCnt = 15;
 
+	IplImage * src1 = cvLoadImage("mid_300.bmp", 0);
+	if(src1==NULL){printf("load file erro\n");return -1;}  
+	CORDINATE_PAIR cordPair1= getX_cordinateofVerticalBar(src1,14,2,TARGETTYPE_MIDDLE,10,0,true);
+	//CORDINATE_PAIR cordPair1={0,src1->width};
+	if(-1==getShiftPosProcess(src1,vec1,cordPair1,secCnt,false,10))
+	{
+		log_erro("getshitPosProcess failed\n");
+		//return -1;
+	};
 
+	//IplImage * src2 = cvLoadImage("mid_340.bmp", 0);
+	//if(src2==NULL){printf("load file erro\n");return -1;}  
+	//CORDINATE_PAIR cordPair2= getX_cordinateofVerticalBar(src2,14,2,TARGETTYPE_LEFT,10,0,true);
+	//getShiftPosProcess(src2,vec2,cordPair2,secCnt,false,10);
+
+	//IplImage * src3 = cvLoadImage("right_440.bmp", 0);
+	//if(src3==NULL){printf("load file erro\n");return -1;}  
+	//CORDINATE_PAIR cordPair3= getX_cordinateofVerticalBar(src3,14,2,TARGETTYPE_LEFT,10,0,true);
+	//getShiftPosProcess(src3,vec3,cordPair3,secCnt,false,10);
+
+	//IplImage *rlt = cvLoadImage("6955_600_400_1.bmp", 0);
+	//if(rlt==NULL){printf("load file erro\n");return -1;}  
+    
+
+	return 0;
+}
+#endif
 static void get_arg(char *buf, int buf_size, const char **pp)
 {
 	const char *p;

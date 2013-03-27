@@ -11,7 +11,7 @@
 #include "prepare.h"
 typedef std::vector<CORDINATE_PAIR> vecCordinate;
 
-int getLinePitchProcess(IplImage &src);
+int getLinePitchProcess(IplImage* src);
 
 
 //在查找偏移之前，先要找到作为标准的那一行。
@@ -27,7 +27,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 //set line white from ref the line num in linelist
 void setImgLineGroup(IplImage* src,std::list<int> linelist);
 
-void getShiftPosProcess(IplImage* src,vecCordinate rltvec,CORDINATE_PAIR cordiPair );
+int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,CORDINATE_PAIR cordiPair ,int secCnt,bool isAdaptiveThres=true,int thresholdBW=10, int achorCordnate=1);
 
 /************变量声明**************************/
 extern unsigned char cmpLineLen;

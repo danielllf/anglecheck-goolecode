@@ -3,7 +3,7 @@
 #include "../include/headers.h"
 #include "../include/llfutility.h"
 #include "../include/prepare.h"
-unsigned char cmpLineLen=200;
+unsigned char cmpLineLen=100;
 float Purfactor = 0.9;
 int continuesLinecount = 4;//间距均匀的连续平行线的条数
 int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
@@ -27,18 +27,18 @@ void setImgLineGroup(IplImage* src,std::list<int> linelist)
 	}
 }
 
-int getLinePitchProcess(IplImage &src)
+int getLinePitchProcess(IplImage *src)
 {
-	LineImage lineimgObj(cvGetSize(&src),lineThickness,whiteLineWeight);
+	LineImage lineimgObj(cvGetSize(src),lineThickness,whiteLineWeight);
 
 	int sumAtlinePos;
-	CvScalar sumSrc = cvSum(&src);
+	CvScalar sumSrc = cvSum(src);
 	Pos_STATUS current_linePos,pre_linePos;
 	CalcObjVector elem_calc;
 	CalcObjList final_calc;
     LINEIFO elementLineInfo;//很小区域内算出的SUM最大的一条线,是终极计算的element 
 	LINEIFO finalLineInfo;
-	int src_height = cvGetSize(&src).height;
+	int src_height = cvGetSize(src).height;
 
 	lineimgObj.resetImageLine(cvPoint(0,10),cmpLineLen);//just for getting sumLineimg,10可为任意数字
 	int sumLineimg = (int)(cvSum(lineimgObj.getImage()).val[0]);
@@ -48,7 +48,7 @@ int getLinePitchProcess(IplImage &src)
 
 		lineimgObj.resetImageLine(cvPoint(0,i),cmpLineLen);
 		
-		sumAtlinePos=getSumOfLineMask(&src,lineimgObj.getImage());		
+		sumAtlinePos=getSumOfLineMask(src,lineimgObj.getImage());		
 
 		if(i==0)//init status at first
 		{
@@ -84,20 +84,20 @@ int getLinePitchProcess(IplImage &src)
 		}
 		pre_linePos = current_linePos;
 	}
-#ifdef debug_ShowTime
-	PrintTime("before purifydata");
-#endif
+ 
+	log_process("before purifydata\n");
+ 
 
 	int purity = final_calc.PurifyTheData(Purfactor);
+	if(purity==-1)
+	{log_erro("purify failed\n");return -1;}
+	log_process("after purifydata\n");
 
-#ifdef debug_ShowTime
-	PrintTime("after purifydata");
-#endif
 
 	std::list<int> line_list;
 	int pitch=final_calc.getLinePitch(continuesLinecount,continuesTol,line_list);
 #ifdef showLineGroup
-		setImgLineGroup(&src,line_list);
+		setImgLineGroup(src,line_list);
 #endif
    
 	return pitch;
@@ -164,9 +164,9 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
    int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
-#ifdef debug_ShowTime
-   PrintTime("after getTheStarLine");
-#endif
+
+   log_process("after getTheStarLine\n");
+
 
    int preLine=starLine;
    CvPoint startPt;
@@ -180,29 +180,32 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
    return starLine;
 }
 
- void getShiftPosProcess(IplImage* src,vecCordinate rltvec,CORDINATE_PAIR cordiPair )
+ int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,CORDINATE_PAIR edgePair,int secCnt,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
  {
-	 int thresholdBW =10;
-	IplImage *img = g_CopyRectFromImg(src,cvRect(cordiPair.left_cordinate,0,cordiPair.right_cordinate-cordiPair.left_cordinate,src->height));
-	IplImage* morphImg=getMorphologyImg(img,CV_MOP_TOPHAT,thresholdBW);
+	IplImage *img =g_CopyRectFromImg(src,cvRect(edgePair.left_cordinate,0,edgePair.right_cordinate-edgePair.left_cordinate,src->height));
+	
+	 IplImage* morphImg=getMorphologyImg(img,CV_MOP_TOPHAT,isAdaptiveThres,thresholdBW,achorCordnate);
 
-	cvThreshold( src,src,50, 100, CV_THRESH_BINARY); //取阈值把图像转为二值图像
+	log_process("mainStarrrr\n");	
+	
+	int pitch= getLinePitchProcess(morphImg);
+	if(pitch==-1)
+	{
+		log_erro("getpich failed\n");
+		return -1;
+	}
+	log_process("mainEnd, pitch:%d\n",pitch);
 
-	PrintTime("mainStarrrr");	
-	int pitch= getLinePitchProcess(*src);
-	printf("pitch:%d\n",pitch);
-	PrintTime("mainEnd");
+	int startline = getShiftPos(morphImg,pitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,rltvec);
+	
+	printVecPoint(rltvec);
+	log_process("after getShiftPos,start line:%d\n",startline);
 
-	vectorPoint vec;
-	int secCnt = 15;
-	int startline = getShiftPos(src,pitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,vec);
-	printf("start line:%d\n",startline);
-	printVecPoint(vec);
-	PrintTime("after getShiftPos");
 
-	IMG_SHOW("src",src);
-	cvSaveImage("aftersrc.jpg",src);
-	cvWaitKey();
-	cvReleaseImage(&src);
+	//cvWaitKey();
+		IMG_SHOW("morphImg",morphImg);
+		cvSaveImage("midrlt.jpg",morphImg);	cvWaitKey();
+	cvReleaseImage(&morphImg);
 	cvReleaseImage(&img);
+	return 0;
  }

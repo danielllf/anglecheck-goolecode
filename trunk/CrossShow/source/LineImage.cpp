@@ -20,6 +20,10 @@ IplImage* LineImage::getImage()
 }
 void LineImage::resetImageLine(CvPoint startPt,int lineLen)
 {
+	if (lineLen>m_pImage->width)
+	{
+		lineLen = m_pImage->width;
+	}
 		cvSet(m_pImage,cvScalar(0));
 		if(m_lineDirect==LINE_HORIZON)
 		{

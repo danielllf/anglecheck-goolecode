@@ -14,7 +14,7 @@ enum{
 };
 
 #define debug_ShowTime 
-#define showLineGroup 
+//#define showLineGroup 
 #define  ShowLineSect 
 typedef std::vector<CvPoint> vectorPoint;
 typedef std::vector<int> vectorInt;
