@@ -48,9 +48,10 @@ void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int co
 
 }
 
-//打印形如 "时间，函数名,行号==>>信息内容"
-void llf_error (int curtrace_level,char*file,int line,const char *fmt, ...)
+////打印形如 "时间，函数名,行号==>>信息内容"
+ void llf_error (int curtrace_level,char*file,int line,const char *fmt, ...)
 {
+	char* filename = strrchr(file, '\\') + 1;
 	if (curtrace_level>trace_level)return;
 	FILE* pFile=NULL;
 
@@ -65,13 +66,17 @@ void llf_error (int curtrace_level,char*file,int line,const char *fmt, ...)
 	}
 	va_list vl;
 	va_start(vl, fmt);
-	if(curtrace_level==1)fprintf(pFile,"%s,line:%d ",file,line);
+	if(curtrace_level==1)fprintf(pFile,"%s,line:%d ",filename,line);
 	if (curtrace_level==2)fprintf(pFile,__TIME__"=>");
-
+    
 	vfprintf(pFile, fmt, vl);
-
 	va_end(vl);
-	fclose(pFile);
+	fflush(pFile);
+	if (log2file)
+	{
+		fclose(pFile);
+	}
+	
 }
 
 
@@ -216,8 +221,9 @@ void printVecPoint(vectorPoint &vec)
 	int len = vec.size();
 	for (int i=0;i<len;i++)
 	{
-		printf("(%d,%d)\n",vec[i].x,vec[i].y);
+		log_process("(%d,%d)\n",vec[i].x,vec[i].y);
 	}
+	
 }
 //返回以lineimg中line位置覆盖下的两图像之和,以line为mask
 int getSumOfLineMask(IplImage* src,IplImage* lineImg)
