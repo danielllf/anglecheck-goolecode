@@ -184,9 +184,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
  {
 	IplImage *img =g_CopyRectFromImg(src,cvRect(edgePair.left_cordinate,0,edgePair.right_cordinate-edgePair.left_cordinate,src->height));
 	
-	 IplImage* morphImg=getMorphologyImg(img,CV_MOP_TOPHAT,isAdaptiveThres,thresholdBW,achorCordnate);
-
-	log_process("mainStarrrr\n");	
+	 IplImage* morphImg=getMorphologyImg(img,CV_MOP_BLACKHAT,isAdaptiveThres,thresholdBW,achorCordnate);
 	
 	int pitch= getLinePitchProcess(morphImg);
 	if(pitch==-1)
@@ -194,7 +192,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 		log_erro("getpich failed\n");
 		return -1;
 	}
-	log_process("mainEnd, pitch:%d\n",pitch);
+	log_process("pitch:%d\n",pitch);
 
 	int startline = getShiftPos(morphImg,pitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,rltvec);
 	
@@ -204,7 +202,9 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 
 	//cvWaitKey();
 		IMG_SHOW("morphImg",morphImg);
-		cvSaveImage("midrlt.jpg",morphImg);	cvWaitKey();
+		//cvSaveImage("midrlt.jpg",morphImg);	
+	//cvWaitKey();
+		
 	cvReleaseImage(&morphImg);
 	cvReleaseImage(&img);
 	return 0;

@@ -117,16 +117,20 @@ int main()
 	vectorPoint vec1,vec2,vec3;
 	int secCnt = 15;
 
-	IplImage * src1 = cvLoadImage("mid_300.bmp", 0);
-	if(src1==NULL){printf("load file erro\n");return -1;}  
-	CORDINATE_PAIR cordPair1= getX_cordinateofVerticalBar(src1,14,2,TARGETTYPE_MIDDLE,10,0,true);
-	//CORDINATE_PAIR cordPair1={0,src1->width};
+	//IplImage * src1 = cvLoadImage("mid_300.bmp", 0);
+		log_process("mainStarrrr\n");	
+	IplImage * src1 = cvLoadImage("run_008_1.bmp", 0);
+	if(src1==NULL)
+	{printf("load file erro\n");return -1;
+	}  
+	//CORDINATE_PAIR cordPair1= getX_cordinateofVerticalBar(src1,14,2,TARGETTYPE_MIDDLE,10,0,true);
+	CORDINATE_PAIR cordPair1={0,src1->width};
 	if(-1==getShiftPosProcess(src1,vec1,cordPair1,secCnt,false,10))
 	{
 		log_erro("getshitPosProcess failed\n");
 		//return -1;
 	};
-
+     cvWaitKey();
 	//IplImage * src2 = cvLoadImage("mid_340.bmp", 0);
 	//if(src2==NULL){printf("load file erro\n");return -1;}  
 	//CORDINATE_PAIR cordPair2= getX_cordinateofVerticalBar(src2,14,2,TARGETTYPE_LEFT,10,0,true);

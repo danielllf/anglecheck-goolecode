@@ -118,7 +118,8 @@ IplImage *getMorphologyImg(IplImage* src,int operation,bool isAdaptiveThres,int 
 	//if(isShowResultImg)
 	{
 		cvShowImage("MorphologyImgBinery", dst);
-		cvWaitKey();
+		//cvWaitKey();
+		
 	}
 	cvReleaseImage(&temp);
 	cvReleaseImage(&img);
