@@ -67,7 +67,16 @@ void mklinecolor(Mat *m, const int mid_line_num,const int tolerance,const int co
 	va_list vl;
 	va_start(vl, fmt);
 	if(curtrace_level==1)fprintf(pFile,"%s,line:%d ",filename,line);
-	if (curtrace_level==2)fprintf(pFile,__TIME__"=>");
+
+	if (curtrace_level==2)
+	{
+		SYSTEMTIME sys;
+		GetLocalTime( &sys ); 
+		char timestr[100]={0};
+		sprintf( timestr,"%02d:%02d:%02d.%03d =>",sys.wHour,sys.wMinute, sys.wSecond,sys.wMilliseconds); 
+
+		fprintf(pFile,"%s",timestr);
+	}
     
 	vfprintf(pFile, fmt, vl);
 	va_end(vl);
