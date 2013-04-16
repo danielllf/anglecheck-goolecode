@@ -3,14 +3,14 @@
 #include "../include/headers.h"
 #include "../include/llfutility.h"
 #include "../include/prepare.h"
-unsigned char cmpLineLen=100;
+unsigned char cmpLineLen=40;
 float Purfactor = 0.9;
 int continuesLinecount = 4;//间距均匀的连续平行线的条数
 int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
 //此值如果未找到，则会从0.05开始，以台阶0.05向上递增，直到找到为止
 float continuesTol=0.03;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
-int lineThickness=2;
-double allowedPercentTOLwhenShifting = 0.3;
+int lineThickness=1;
+double allowedPercentTOLwhenShifting = 0.5;//寻求最佳覆盖位置时的上下偏移量，相对于pitch的百分比
 
 enum Pos_STATUS{
 	 OnValley=0,
@@ -152,7 +152,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 	{
 		 lineLen = src->width/vectElementCount;
 
-		if (lineLen<3*linePitch)// 至少要能覆盖3个点
+		if (lineLen<1.1*linePitch)// 至少要能覆盖2个点
 		{
 			vectElementCount--;
 
@@ -163,7 +163,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
-   int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
+   int starLine = 2*src->height/3;//getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
 
    log_process("after getTheStarLine\n");
 
@@ -182,11 +182,12 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 
  int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,CORDINATE_PAIR edgePair,int secCnt,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
  {
+
 	IplImage *img =g_CopyRectFromImg(src,cvRect(edgePair.left_cordinate,0,edgePair.right_cordinate-edgePair.left_cordinate,src->height));
 	
-	 IplImage* morphImg=getMorphologyImg(img,CV_MOP_BLACKHAT,isAdaptiveThres,thresholdBW,achorCordnate);
+	 IplImage* morphImg=getMorphologyImg(img,CV_MOP_TOPHAT,isAdaptiveThres,thresholdBW,achorCordnate);
 	
-	int pitch= getLinePitchProcess(morphImg);
+	int pitch= 11;//getLinePitchProcess(morphImg);
 	if(pitch==-1)
 	{
 		log_erro("getpich failed\n");
