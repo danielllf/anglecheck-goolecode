@@ -235,12 +235,29 @@ void printVecPoint(vectorPoint &vec)
 	
 }
 //返回以lineimg中line位置覆盖下的两图像之和,以line为mask
-int getSumOfLineMask(IplImage* src,IplImage* lineImg)
+int getSumOfLineMask(IplImage* src,IplImage* lineImg,CvRect ROIrect)
 {
 	IplImage *rltimg = cvCreateImage(cvGetSize(src),src->depth,src->nChannels);
+	cvSetImageROI(src,ROIrect);
+	cvSetImageROI(lineImg,ROIrect);
+	cvSetImageROI(rltimg,ROIrect);
 	cvSet(rltimg,cvScalar(0));
 	cvAdd(src,lineImg,rltimg,lineImg);
 	int sum = (int)cvSum(rltimg).val[0];
+	cvResetImageROI(src);
+	cvResetImageROI(lineImg);
+	cvResetImageROI(rltimg);
+	cvReleaseImage(&rltimg);
+	return  sum;
+}
+int getSumOfLineMask(IplImage* src,IplImage* lineImg)
+{
+	IplImage *rltimg = cvCreateImage(cvGetSize(src),src->depth,src->nChannels);
+
+	cvSet(rltimg,cvScalar(0));
+	cvAdd(src,lineImg,rltimg,lineImg);
+	int sum = (int)cvSum(rltimg).val[0];
+
 	cvReleaseImage(&rltimg);
 	return  sum;
 }

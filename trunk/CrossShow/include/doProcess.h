@@ -27,7 +27,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 //set line white from ref the line num in linelist
 void setImgLineGroup(IplImage* src,std::list<int> linelist);
 
-int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,CORDINATE_PAIR cordiPair ,int secCnt,bool isAdaptiveThres=true,int thresholdBW=10, int achorCordnate=1);
+int getShiftPosProcess(IplImage* src,vectorPoint &rltvec ,int secCnt,bool isAdaptiveThres=true,int thresholdBW=10, int achorCordnate=1);
 
 /************±äÁ¿ÉùÃ÷**************************/
 extern unsigned char cmpLineLen;

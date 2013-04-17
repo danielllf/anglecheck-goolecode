@@ -115,34 +115,21 @@ int main()
 	initParms();
 	int subImgCnt=3;
 	vectorPoint vec1,vec2,vec3;
-	int secCnt = 8;
+	int secCnt = 18;
 
-	//IplImage * src1 = cvLoadImage("mid_300.bmp", 0);
-		log_process("mainStarrrr\n");	
-	IplImage * src1 = cvLoadImage("run_back_002.bmp", 0);
+		log_process("mainStarT...............\n");	
+	IplImage * src1 = cvLoadImage("run_008.bmp", 0);
 	if(src1==NULL)
 	{printf("load file erro\n");return -1;
 	}  
-	//CORDINATE_PAIR cordPair1= getX_cordinateofVerticalBar(src1,14,2,TARGETTYPE_MIDDLE,10,0,true);
-	CORDINATE_PAIR cordPair1={0,src1->width};
-	if(-1==getShiftPosProcess(src1,vec1,cordPair1,secCnt,false,15))
+	
+	if(-1==getShiftPosProcess(src1,vec1,secCnt,false,10))
 	{
 		log_erro("getshitPosProcess failed\n");
 		//return -1;
 	};
+	log_process("the end\n\n");
      cvWaitKey();
-	//IplImage * src2 = cvLoadImage("mid_340.bmp", 0);
-	//if(src2==NULL){printf("load file erro\n");return -1;}  
-	//CORDINATE_PAIR cordPair2= getX_cordinateofVerticalBar(src2,14,2,TARGETTYPE_LEFT,10,0,true);
-	//getShiftPosProcess(src2,vec2,cordPair2,secCnt,false,10);
-
-	//IplImage * src3 = cvLoadImage("right_440.bmp", 0);
-	//if(src3==NULL){printf("load file erro\n");return -1;}  
-	//CORDINATE_PAIR cordPair3= getX_cordinateofVerticalBar(src3,14,2,TARGETTYPE_LEFT,10,0,true);
-	//getShiftPosProcess(src3,vec3,cordPair3,secCnt,false,10);
-
-	//IplImage *rlt = cvLoadImage("6955_600_400_1.bmp", 0);
-	//if(rlt==NULL){printf("load file erro\n");return -1;}  
     
 
 	return 0;
