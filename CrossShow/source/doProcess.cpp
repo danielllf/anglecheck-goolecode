@@ -11,7 +11,8 @@ int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后
 float continuesTol=0.03;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
 int lineThickness=1;
 double allowedPercentTOLwhenShifting = 0.5;//寻求最佳覆盖位置时的上下偏移量，相对于pitch的百分比
-
+int assumedMinLinePitchForCalcPitch = 20;
+int MorphologyMethod= CV_MOP_BLACKHAT;//or CV_MOP_BLACKHAT //检测黑孔
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -47,7 +48,7 @@ int getLinePitchProcess(IplImage *src)
 	{
 
 		lineimgObj.resetImageLine(cvPoint(0,i),cmpLineLen);
-		
+		////rect是用来减少计算量的有效图形区域,仅对左右限制
 		sumAtlinePos=getSumOfLineMask(src,lineimgObj.getImage());		
 
 		if(i==0)//init status at first
@@ -112,12 +113,16 @@ int getTheStarLine(IplImage *src,LineImage &lineimgObj,int linePitch,int lineCnt
 	for (int i=0;i<searchEndline;++i)
 	{
 		lineimgObj.resetImageLineGroup(cvPoint(0,i),lineLen,lineCntInGroup,linePitch);
-
-		int sum=getSumOfLineMask(src,lineimgObj.getImage());
+		//获取计算ROI区域
+		int rectUper = i-linePitch<0?0:i-linePitch;
+		int RoiRctHeight = (lineCntInGroup+1)*linePitch-rectUper>src->height?src->height-rectUper:(lineCntInGroup+1)*linePitch;
+	CvRect calcRect = cvRect(0,rectUper,lineLen,RoiRctHeight);
+		int sum=getSumOfLineMask(src,lineimgObj.getImage(),calcRect);
 		vectObj.addone(sum,i);
 	}
 		int TheLine = vectObj.getTheMaxElement_Linenum();
 	return TheLine;
+
 }
 
 int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int linePitch,int lineCntInGroup,
@@ -133,9 +138,11 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 #ifdef ShowLineSectGroup
 		IMG_SHOW("tmp",lineimgObj.getImage());cvWaitKey();
 #endif
-		
-
-	    sum=getSumOfLineMask(src,lineimgObj.getImage());
+		////rect是用来减少计算量的有效图形区域
+		int rectUper = startPT.y-linePitch;
+		int RoiRctHeight = (lineCntInGroup+1)*linePitch+startPT.y>src->height?src->height-rectUper: (lineCntInGroup+1)*linePitch;
+		CvRect calcRect = cvRect(startPT.x,rectUper,lineLen,RoiRctHeight);
+	    sum=getSumOfLineMask(src,lineimgObj.getImage(),calcRect);
 		vectObj.addone(sum,i);
 	}
 	int findLine = vectObj.getTheMaxElement_Linenum();
@@ -163,8 +170,9 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
-   int starLine = 2*src->height/3;//getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
-
+log_process("before getTheStarLine\n");
+   int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
+//int starLine = 2*src->height/3;
    log_process("after getTheStarLine\n");
 
 
@@ -172,6 +180,7 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
    CvPoint startPt;
 	for (int i=0;i<vectElementCount;++i)
 	{
+
 		startPt.x = i*lineLen;
 		startPt.y = preLine;
 		preLine = getMaxLineGroupSumLineWithinTol(src,lineimgObj,linePitch,lineCntInGroup,lineLen,startPt,pitchTolInt);
@@ -180,20 +189,19 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
    return starLine;
 }
 
- int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,CORDINATE_PAIR edgePair,int secCnt,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
+ int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,int secCnt,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
  {
 
-	IplImage *img =g_CopyRectFromImg(src,cvRect(edgePair.left_cordinate,0,edgePair.right_cordinate-edgePair.left_cordinate,src->height));
-	
-	 IplImage* morphImg=getMorphologyImg(img,CV_MOP_TOPHAT,isAdaptiveThres,thresholdBW,achorCordnate);
-	
-	int pitch= 11;//getLinePitchProcess(morphImg);
+	IplImage *img =src;
+	 IplImage* morphImg=getMorphologyImg(img,MorphologyMethod,isAdaptiveThres,thresholdBW,achorCordnate);
+	log_process("brfore get pitch\n");
+	int pitch= getLinePitchProcess(morphImg);
 	if(pitch==-1)
 	{
 		log_erro("getpich failed\n");
 		return -1;
 	}
-	log_process("pitch:%d\n",pitch);
+	log_process("after,pitch:%d\n",pitch);
 
 	int startline = getShiftPos(morphImg,pitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,rltvec);
 	
@@ -207,6 +215,6 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 	//cvWaitKey();
 		
 	cvReleaseImage(&morphImg);
-	cvReleaseImage(&img);
+	//cvReleaseImage(&img);
 	return 0;
  }

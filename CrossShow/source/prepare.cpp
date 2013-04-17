@@ -7,6 +7,7 @@ int whiteLineWeight = 50;
 //1个vertical短线,sum不变化时，认为找到了vertical line
 //返回x-cordiante of the found bar
 //subImageType:最左端（图中会有1个分割线），中端(图中会有2个分割线)
+//已经无用，不推荐用
 CORDINATE_PAIR getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,float verticalbarTimesOfpictch,int subImageType, int y_cordinate,int x_cordStart,bool showResultMark)
 {
 	CORDINATE_PAIR cordpair;
@@ -34,7 +35,10 @@ CORDINATE_PAIR getX_cordinateofVerticalBar(IplImage *bineryImg,int imgPitch,floa
 		for (int i=x_cordStart;i<bineryImg->width;++i)
 		{
 			lineimgObj.resetImageLine(cvPoint(i,y_cordinate),verticabarLen);
-			sumAtlinePos=getSumOfLineMask(bineryImg,lineimgObj.getImage());	
+			//此处假设竖直线的左右倾斜公差为+/-10*imgPitch
+			CvSize size = cvGetSize(bineryImg);
+			CvRect Roirect = cvRect(0,0,size.width,size.height);
+			sumAtlinePos=getSumOfLineMask(bineryImg,lineimgObj.getImage(),Roirect);	
 
 			if (sumAtlinePos==sumLineimg)
 			{ 
@@ -115,12 +119,10 @@ IplImage *getMorphologyImg(IplImage* src,int operation,bool isAdaptiveThres,int 
 	{
 		cvThreshold( img, dst,thresholdBW, 255.0, CV_THRESH_BINARY ); //取阈值把图像转为二值图像
 	}
-	//if(isShowResultImg)
-	{
-		cvShowImage("MorphologyImgBinery", dst);
+
+		//cvShowImage("MorphologyImgBinery", dst);
 		//cvWaitKey();
-		
-	}
+
 	cvReleaseImage(&temp);
 	cvReleaseImage(&img);
 	
