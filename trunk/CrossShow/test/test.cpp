@@ -115,7 +115,7 @@ int main()
 	initParms();
 	int subImgCnt=3;
 	vectorPoint vec1,vec2,vec3;
-	int secCnt = 18;
+	int secCnt = 10;
 
 		log_process("mainStarT...............\n");	
 	IplImage * src1 = cvLoadImage("run_008.bmp", 0);

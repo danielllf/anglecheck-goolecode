@@ -234,7 +234,8 @@ float CalcObjList::getLinedistanceSdvPercentToMean(int continuesLineCount,const 
 //当continuesTol=0.5时，认为获取失败
 int CalcObjList::getLinePitch(int continuesCount,float &continuesTol,std::list<int> &rlt_list)
 {
-	assert(continuesCount>=3);
+	//assert(continuesCount>=2);
+	if(continuesCount<2)continuesCount=2;
 	std::list<LINEIFO>:: iterator  it;
 	int it_startOfthisTurn;
 	float percentsdvtomean;
