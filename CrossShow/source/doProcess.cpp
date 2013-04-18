@@ -3,7 +3,7 @@
 #include "../include/headers.h"
 #include "../include/llfutility.h"
 #include "../include/prepare.h"
-unsigned char cmpLineLen=40;
+int cmpLineLen=40;//检测linepitch时的线段长度
 float Purfactor = 0.9;
 int continuesLinecount = 2;//间距均匀的连续平行线的条数,最小为2;
 int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
@@ -11,8 +11,8 @@ int safeVoidpitchCycleCntIngetStartLine = 2;//在计算cmp starline时，去除图片最后
 float continuesTol=0.03;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
 int lineThickness=2;//
 double allowedPercentTOLwhenShifting = 0.5;//寻求最佳覆盖位置时的上下偏移量，相对于pitch的百分比
-int assumedMinLinePitchForCalcPitch = 20;
 int MorphologyMethod= CV_MOP_BLACKHAT;//or CV_MOP_BLACKHAT //检测黑孔
+int useAutoStartLineFind = 0;
 enum Pos_STATUS{
 	 OnValley=0,
 	 OnMoutain
@@ -171,8 +171,15 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
 	int pitchTolInt = (int)linePitch*pitchTol;
 	//find the startline 
 log_process("before getTheStarLine\n");
-   int starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
-//int starLine = 2*src->height/3;
+   int starLine;
+   if (useAutoStartLineFind)
+   {
+	    starLine = getTheStarLine(src,lineimgObj,linePitch,lineCntInGroup,lineLen);
+   }
+   else
+   {
+		starLine = src->height/2;
+   }
    log_process("after getTheStarLine\n");
 
 
@@ -188,33 +195,34 @@ log_process("before getTheStarLine\n");
 	}
    return starLine;
 }
+ int getLinePitch(IplImage* src,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
+ {
 
- int getShiftPosProcess(IplImage* src,vectorPoint &rltvec,int secCnt,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
+	 IplImage *img =src;
+	 IplImage* morphImg=getMorphologyImg(img,MorphologyMethod,isAdaptiveThres,thresholdBW,achorCordnate);
+	 log_process("brfore get pitch\n");
+	 int pitch= getLinePitchProcess(morphImg);
+	 if(pitch==-1)
+	 {
+		 log_erro("getpich failed\n");
+		 return -1;
+	 }
+	 log_process("after,pitch:%d\n",pitch);
+	 return pitch;
+ }
+ int getShiftPosProcess(IplImage* src,int linePitch,vectorPoint &rltvec,int secCnt,bool isAdaptiveThres,int thresholdBW, int achorCordnate)
  {
 
 	IplImage *img =src;
 	 IplImage* morphImg=getMorphologyImg(img,MorphologyMethod,isAdaptiveThres,thresholdBW,achorCordnate);
-	log_process("brfore get pitch\n");
-	int pitch= getLinePitchProcess(morphImg);
-	if(pitch==-1)
-	{
-		log_erro("getpich failed\n");
-		return -1;
-	}
-	log_process("after,pitch:%d\n",pitch);
 
-	int startline = getShiftPos(morphImg,pitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,rltvec);
+	int startline = getShiftPos(morphImg,linePitch, allowedPercentTOLwhenShifting,continuesLinecount,secCnt,rltvec);
 	
 	printVecPoint(rltvec);
 	log_process("after getShiftPos,start line:%d\n",startline);
 
-
-	//cvWaitKey();
-		IMG_SHOW("morphImg",morphImg);
-		//cvSaveImage("midrlt.jpg",morphImg);	
-	//cvWaitKey();
+	IMG_SHOW("morphImg",morphImg);
 		
 	cvReleaseImage(&morphImg);
-	//cvReleaseImage(&img);
 	return 0;
  }

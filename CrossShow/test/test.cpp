@@ -122,12 +122,12 @@ int main()
 	if(src1==NULL)
 	{printf("load file erro\n");return -1;
 	}  
-	
-	if(-1==getShiftPosProcess(src1,vec1,secCnt,false,10))
-	{
-		log_erro("getshitPosProcess failed\n");
-		//return -1;
-	};
+	int pitch = getLinePitch(src1,false,10);
+	//if(-1==getShiftPosProcess(src1,pitch,vec1,secCnt,false,10))
+	//{
+	//	log_erro("getshitPosProcess failed\n");
+	//	//return -1;
+	//};
 	log_process("the end\n\n");
      cvWaitKey();
     
@@ -174,7 +174,8 @@ int parse_configfile(const char* filename)
 	char arg[1024];
 	const char *p;
 	int val;
-
+	float fval;
+const float EPSINON = 0.0001f;//float 与0值比较时注意不能直接比较
 	f = fopen(filename, "r");
 	if (!f) {
 		perror(filename);
@@ -223,6 +224,95 @@ int parse_configfile(const char* filename)
 			}
 			log2file = val;
 		}
+		else if(!strcmp(cmd,"cmpLineLen"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			val = atoi(arg);
+			if (val<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			cmpLineLen = val;
+		}
+		else if(!strcmp(cmd,"Purfactor"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			fval = atof(arg);
+			if (fval<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			Purfactor = fval;
+		}
+		else if(!strcmp(cmd,"continuesLinecount"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			val = atoi(arg);
+			if (val<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			continuesLinecount = val;
+		}
+		else if(!strcmp(cmd,"continuesTol"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			fval = atof(arg);
+			if (fval<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			continuesTol = fval;
+		}		
+		else if(!strcmp(cmd,"lineThickness"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			val = atoi(arg);
+			if (val<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			lineThickness = val;
+		}	
+		else if(!strcmp(cmd,"allowedPercentTOLwhenShifting"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			fval = atof(arg);
+			if (fval<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			allowedPercentTOLwhenShifting = fval;
+		}		
+		else if(!strcmp(cmd,"MorphologyMethod"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			val = atoi(arg);
+			if (val<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			MorphologyMethod = val;
+		}		
+		else if(!strcmp(cmd,"useAutoStartLineFind"))
+		{
+			get_arg(arg, sizeof(arg), &p);
+			val = atoi(arg);
+			if (val<0)
+			{
+				log_erro("Invalid param log2file:%s\n",arg);
+				return -1;
+			}
+			useAutoStartLineFind = val;
+		}
+
 
 	}
 
