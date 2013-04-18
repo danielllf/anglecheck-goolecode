@@ -26,11 +26,11 @@ int getMaxLineGroupSumLineWithinTol(IplImage *src,LineImage &lineimgObj,int line
  int getShiftPos(IplImage *src,int linePitch,double pitchTol,int lineCntInGroup,int &vectElementCount,vectorPoint &vect);
 //set line white from ref the line num in linelist
 void setImgLineGroup(IplImage* src,std::list<int> linelist);
-
-int getShiftPosProcess(IplImage* src,vectorPoint &rltvec ,int secCnt,bool isAdaptiveThres=true,int thresholdBW=10, int achorCordnate=1);
+ int getLinePitch(IplImage* src,bool isAdaptiveThres=true,int thresholdBW=10, int achorCordnate=1);
+int getShiftPosProcess(IplImage* src,int linePitch,vectorPoint &rltvec ,int secCnt,bool isAdaptiveThres=true,int thresholdBW=10, int achorCordnate=1);
 
 /************变量声明**************************/
-extern unsigned char cmpLineLen;
+extern int cmpLineLen;
 extern float Purfactor ;
 extern int continuesLinecount;//间距均匀的连续线的条数
 extern int safeVoidpitchCycleCntIngetStartLine ;//在计算cmp starline时，去除图片最后的几个cycle,防止循环溢出。因为pitch是一个统计均值，不一定准确。
@@ -38,5 +38,7 @@ extern int safeVoidpitchCycleCntIngetStartLine ;//在计算cmp starline时，去除图片
 extern float continuesTol;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好
 extern int lineThickness;
 extern double allowedPercentTOLwhenShifting;
+extern int MorphologyMethod;//or CV_MOP_BLACKHAT //检测黑孔
+extern  int useAutoStartLineFind;//是否使用getStartLine函数来查找最佳起结线，启动会耗时多，但精确度提高
 
 #endif

@@ -1,3 +1,11 @@
 log2file 1 #是否打印到文件 0为到screen
 TraceLevel 2 #0==not printf 1==print erro,  2==printf all the info
 whiteLineWeight 50 #白色线段的重量，应该尽量小，计算量小
+cmpLineLen 40 #;
+Purfactor 0.9 #;
+continuesLinecount 2 #//间距均匀的连续线的条数
+continuesTol  0.03 #;//（设置时<0.05）连续几条线被视为是连续且均匀时的sdv/mean,越小越好#此值如果未找到，则会从0.05开始，以台阶0.05向上递增，直到找到为止
+lineThickness 1#;
+allowedPercentTOLwhenShifting 0.5#;
+MorphologyMethod 6 #//or CV_MOP_BLACKHAT==6(检测黑孔)  CV_MOP_TOPHAT==5(白孔)
+useAutoStartLineFind 1 # 0==not use getTheStarLine , 1 == use
